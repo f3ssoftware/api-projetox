@@ -29,7 +29,6 @@
     "@nestjs/swagger": "^6.3.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
-    "crypto-js": "^4.1.1",
     "js-brasil": "^2.5.3",
     "jwt-decode": "^3.1.2",
     "nestjs-pino": "^3.1.2",
