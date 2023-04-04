@@ -1,0 +1,114 @@
+version: 2.1
+
+orbs:
+  discord: antonioned/discord@0.1.0
+
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.11
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Verifing Aws-cli
+          command: aws --version
+      - run:
+          name: Verifing Docker
+          command: docker --version
+      - run:
+          name: ECR Login
+          command: |
+            aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPOSITORY}
+      - run:
+          name: Build Image
+          command: |
+            if [ $CIRCLE_BRANCH = 'master' ]; then
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:prod-latest --target production .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:prod-${CIRCLE_BUILD_NUM} --target production .
+            fi
+            if [ $CIRCLE_BRANCH = 'develop' ]; then
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:dev-latest --target develop .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:dev-${CIRCLE_BUILD_NUM} --target develop .
+            fi
+      - run:
+          name: Push image to ECR
+          command: |
+            if [ $CIRCLE_BRANCH = 'master' ]; then
+              docker push ${ECR_REPOSITORY}/api-projetox:prod-latest
+              docker push ${ECR_REPOSITORY}/api-projetox:prod-${CIRCLE_BUILD_NUM}
+            fi
+            if [ $CIRCLE_BRANCH = 'develop' ]; then
+              docker push ${ECR_REPOSITORY}/api-projetox:dev-latest
+              docker push ${ECR_REPOSITORY}/api-projetox:dev-${CIRCLE_BUILD_NUM}
+            fi
+      - discord/status:
+          fail_only: true
+          failure_message: ':x: **${CIRCLE_USERNAME}**: erro ao realizar build da imagem API-PROJETOX: "${GIT_COMMIT_DESC}" (Branch: ${CIRCLE_BRANCH}) para o ECR. :x:'
+          webhook: '${WEBHOOK_URL}'
+
+  deploy:
+    working_directory: ~/repo
+    docker:
+      - image: alpine:3.5
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.11
+      - run:
+          name: Install awscli
+          command: |
+            apk add --update --no-cache \
+            curl \
+            jq \
+            ca-certificates \
+            bash \
+            python \
+            && python -m ensurepip \
+            && rm -r /usr/lib/python*/ensurepip \
+            && pip install --upgrade pip setuptools \
+            awscli --ignore-installed \
+            && rm -r /root/.cache
+      - run:
+          name: Install ecs-deploy
+          command: |
+            curl https://raw.githubusercontent.com/silinternational/ecs-deploy/master/ecs-deploy -o /bin/ecs-deploy \
+            && chmod +x /bin/ecs-deploy
+      - run:
+          name: Deployment on ECS
+          command: |
+            if [ $CIRCLE_BRANCH = 'master' ]; then
+              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_PROD} --image ${ECR_REPOSITORY}/api-projetox:prod-latest --service-name ${AWS_SERVICE_PROD} --use-latest-task-def --timeout "1800" --min "100" --max "200"
+            fi
+            if [ $CIRCLE_BRANCH = 'develop' ]; then
+              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_DEV} --image ${ECR_REPOSITORY}/api-projetox:dev-latest --service-name ${AWS_SERVICE_DEV} --use-latest-task-def --timeout "1800" --min "100" --max "200"
+            fi
+      - discord/status:
+          fail_only: false
+          failure_message: ':x: **${CIRCLE_USERNAME}**: erro ao realizar deploy da API-PROJETOX: "${GIT_COMMIT_DESC}" (Branch: ${CIRCLE_BRANCH}). :x:'
+          success_message: ':white_check_mark: **${CIRCLE_USERNAME}**: deploy do projeto API-PROJETOX: "${GIT_COMMIT_DESC}" (Branch: ${CIRCLE_BRANCH}) realizado com sucesso. :white_check_mark:'
+          webhook: '${WEBHOOK_URL}'
+
+workflows:
+  version: 2.1
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - develop
