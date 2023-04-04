@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
+
 import { AppController } from './app.controller';
 
 import { AppService } from './app.service';
 
 import { AuthenticationModule } from './authentication/authentication.module';
 import { SharedModule } from './shared/shared.module';
-import { LoggerModule } from 'nestjs-pino';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { LoggerModule } from 'nestjs-pino';
     }),
     AuthenticationModule,
     SharedModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

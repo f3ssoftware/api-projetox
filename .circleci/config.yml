@@ -29,23 +29,23 @@ jobs:
           name: Build Image
           command: |
             if [ $CIRCLE_BRANCH = 'master' ]; then
-              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:prod-latest --target production .
-              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:prod-${CIRCLE_BUILD_NUM} --target production .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}:prod-latest --target production .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}:prod-${CIRCLE_BUILD_NUM} --target production .
             fi
             if [ $CIRCLE_BRANCH = 'develop' ]; then
-              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:dev-latest --target develop .
-              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}/api-projetox:dev-${CIRCLE_BUILD_NUM} --target develop .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}:dev-latest --target develop .
+              docker build -f ./Dockerfile -t ${ECR_REPOSITORY}:dev-${CIRCLE_BUILD_NUM} --target develop .
             fi
       - run:
           name: Push image to ECR
           command: |
             if [ $CIRCLE_BRANCH = 'master' ]; then
-              docker push ${ECR_REPOSITORY}/api-projetox:prod-latest
-              docker push ${ECR_REPOSITORY}/api-projetox:prod-${CIRCLE_BUILD_NUM}
+              docker push ${ECR_REPOSITORY}:prod-latest
+              docker push ${ECR_REPOSITORY}:prod-${CIRCLE_BUILD_NUM}
             fi
             if [ $CIRCLE_BRANCH = 'develop' ]; then
-              docker push ${ECR_REPOSITORY}/api-projetox:dev-latest
-              docker push ${ECR_REPOSITORY}/api-projetox:dev-${CIRCLE_BUILD_NUM}
+              docker push ${ECR_REPOSITORY}:dev-latest
+              docker push ${ECR_REPOSITORY}:dev-${CIRCLE_BUILD_NUM}
             fi
       - discord/status:
           fail_only: true
@@ -83,10 +83,10 @@ jobs:
           name: Deployment on ECS
           command: |
             if [ $CIRCLE_BRANCH = 'master' ]; then
-              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_PROD} --image ${ECR_REPOSITORY}/api-projetox:prod-latest --service-name ${AWS_SERVICE_PROD} --use-latest-task-def --timeout "1800" --min "100" --max "200"
+              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_PROD} --image ${ECR_REPOSITORY}:prod-latest --service-name ${AWS_SERVICE_PROD} --use-latest-task-def --timeout "1800" --min "100" --max "200"
             fi
             if [ $CIRCLE_BRANCH = 'develop' ]; then
-              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_DEV} --image ${ECR_REPOSITORY}/api-projetox:dev-latest --service-name ${AWS_SERVICE_DEV} --use-latest-task-def --timeout "1800" --min "100" --max "200"
+              ecs-deploy --region ${AWS_DEFAULT_REGION} --cluster ${AWS_CLUSTER_DEV} --image ${ECR_REPOSITORY}:dev-latest --service-name ${AWS_SERVICE_DEV} --use-latest-task-def --timeout "1800" --min "100" --max "200"
             fi
       - discord/status:
           fail_only: false
@@ -102,7 +102,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - develop
       - deploy:
           requires:
@@ -110,5 +110,5 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - develop
