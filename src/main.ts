@@ -1,18 +1,22 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+
 import { AppModule } from './app.module';
-import {
-  DocumentBuilder,
-  SwaggerCustomOptions,
-  SwaggerModule,
-} from '@nestjs/swagger';
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    bufferLogs: false,
+  });
 
-  console.log('hauhauhauhauhauhauahauhauahauhauahuahauhaua');
   // Auto-validation
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+
+  // Logger
+  app.useLogger(app.get(Logger));
+  app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -26,18 +30,9 @@ async function bootstrap() {
     .build();
 
   // Swagger Options
-  const swaggerOptions: SwaggerCustomOptions = {
-    customCss: `
-        .topbar-wrapper img {
-          content:url(${process.env.LOGO_BRANCA_PAGSTAR_PNG});
-        }
-        .swagger-ui .topbar { background-color: #027BD8D3; }
-      `,
-  };
-
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api', app, document, swaggerOptions);
+  SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(3000);
 }
 bootstrap();

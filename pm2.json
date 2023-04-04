@@ -1,0 +1,16 @@
+{
+  "name": "api-projetox",
+  "script": "dist/main.js",
+  "instances": "1",
+  "exec_mode": "cluster",
+  "env_dev": {
+    "NODE_ENV": "dev",
+    "KEYCLOAK_URL": "https://auth.f3ssoftware.com/",
+    "KEYCLOAK_ADMIN_USER": "admin",
+    "KEYCLOAK_ADMIN_PASSWORD": "#Yoeov8zi*.",
+    "PORT": "80"
+  },
+  "env_prod": {
+    "NODE_ENV": "prod"
+  }
+}

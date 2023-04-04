@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  api-projetox:
+    container_name: api-projetox
+    build:
+      context: .
+      target: local
+      dockerfile: ./Dockerfile
+    command: npm run start:local
+    ports:
+      - 3000:3000
+    networks:
+      - f3ssoftware-network
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - NODE_ENV=local
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+
+networks:
+  f3ssoftware-network:
+    driver: bridge
