@@ -24,7 +24,7 @@ export class KeycloakService {
     params.append('password', loginDTO.password);
     params.append('grant_type', 'password');
     params.append('client_id', 'pjx');
-
+    console.log(this.url);
     try {
       const { data } = await axios.post(this.url, params);
       return data;
