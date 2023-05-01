@@ -11,6 +11,7 @@ import { SharedModule } from './shared/shared.module';
 import { HealthModule } from './health/health.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
+import { DynamooseModule } from 'nestjs-dynamoose';
 
 @Module({
   imports: [
@@ -41,6 +42,15 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     TransactionsModule,
     UsersModule,
+    DynamooseModule.forRoot({
+      aws: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION,
+      },
+      local: false,
+      logger: false,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

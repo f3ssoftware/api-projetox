@@ -21,7 +21,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 256M
+          memory: 1024M
 
 networks:
   f3ssoftware-network:

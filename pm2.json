@@ -13,6 +13,9 @@
     "NODE_ENV": "prod",
     "KEYCLOAK_URL": "https://auth.f3ssoftware.com/",
     "KEYCLOAK_ADMIN_USER": "admin",
-    "KEYCLOAK_ADMIN_PASSWORD": "#Yoeov8zi*."
+    "KEYCLOAK_ADMIN_PASSWORD": "#Yoeov8zi*.",
+    "AWS_ACCESS_KEY_ID": "AKIA2IJJRK6VEH7NPOLC",
+    "AWS_SECRET_ACCESS_KEY": "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",
+    "AWS_REGION": "us-west-1"
   }
 }

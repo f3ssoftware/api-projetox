@@ -3,12 +3,12 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginDTO {
   @ApiProperty()
-  @IsNotEmpty({ message: 'O atributo "username" não pode ser vazio' })
-  @IsString({ message: 'O atributo "username" deve ser uma string' })
+  @IsNotEmpty({ message: 'Field "username" is required' })
+  @IsString({ message: 'Field "username" should be string' })
   public username: string;
 
   @ApiProperty()
-  @IsNotEmpty({ message: 'O atributo "password" não pode ser vazio' })
-  @IsString({ message: 'O atributo "password" deve ser uma string' })
+  @IsNotEmpty({ message: 'Field "password" is required' })
+  @IsString({ message: 'Field "password" should be a string' })
   public password: string;
 }
