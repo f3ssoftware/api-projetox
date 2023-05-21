@@ -25,6 +25,7 @@ export class TransactionsService {
       supplier: t.supplier,
       observation: t.observation,
       installments: t.installments,
+      wallet_id: t.wallet_id,
     });
   }
 }

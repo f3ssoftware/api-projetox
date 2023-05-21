@@ -10,7 +10,9 @@ export class KeycloakService {
   private url = `${process.env.KEYCLOAK_URL}realms/master/protocol/openid-connect/token`;
 
   async login(loginDTO: LoginDTO): Promise<TokenDTO> {
-    console.log(this.url);
+    console.log('#####################');
+    console.log(loginDTO);
+    console.log('#####################');
     const dto = plainToInstance(LoginDTO, loginDTO);
     const validation = await validate(dto);
 

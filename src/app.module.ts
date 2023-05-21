@@ -12,6 +12,7 @@ import { HealthModule } from './health/health.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { DynamooseModule } from 'nestjs-dynamoose';
+import { WalletsModule } from './wallets/wallets.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
       local: false,
       logger: false,
     }),
+    WalletsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

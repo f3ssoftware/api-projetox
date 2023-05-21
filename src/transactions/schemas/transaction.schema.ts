@@ -31,4 +31,7 @@ export const TransactionSchema = new Schema({
     type: String,
     required: false,
   },
+  wallet_id: {
+    type: String,
+  },
 });

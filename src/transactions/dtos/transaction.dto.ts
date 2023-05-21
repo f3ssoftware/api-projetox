@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   isNotEmpty,
 } from 'class-validator';
 import { TransactionType } from '../enums/transaction-types.enum';
@@ -41,4 +42,9 @@ export class TransactionDTO {
 
   @ApiProperty()
   observation: string;
+
+  @ApiProperty()
+  @IsUUID()
+  @IsNotEmpty({ message: 'Field "wallet_id" is required' })
+  wallet_id: string;
 }
