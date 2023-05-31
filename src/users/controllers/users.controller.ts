@@ -7,7 +7,7 @@ import { UserRegistrationDTO } from '../models/user-registration.dto';
 import { UsersService } from '../services/users.service';
 
 @ApiTags('Users')
-@Controller('users')
+@Controller({ version: ['1'], path: 'users' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Get('logged-in')
