@@ -16,6 +16,6 @@ export const GetRoles = createParamDecorator(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const decoded: any = jwtDecode(token!);
 
-    return decoded['resource_access']['pagstar']['roles'];
+    return decoded['resource_access']['pjx']['roles'];
   },
 );

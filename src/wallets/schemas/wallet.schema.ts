@@ -5,9 +5,6 @@ export const WalletSchema = new Schema({
     type: String,
     hashKey: true,
   },
-  code: {
-    type: Number,
-  },
   currency: {
     type: String,
   },

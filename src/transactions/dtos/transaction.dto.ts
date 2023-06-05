@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -10,6 +11,7 @@ import {
   isNotEmpty,
 } from 'class-validator';
 import { TransactionType } from '../enums/transaction-types.enum';
+import { Installment } from '../entities/installment.interface';
 
 export class TransactionDTO {
   @ApiProperty()
@@ -28,17 +30,22 @@ export class TransactionDTO {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty({ message: 'Field "supplier" is required' })
-  supplier: string;
+  @IsNotEmpty({ message: 'Field "reference" is required' })
+  reference: string;
+
+  @ApiProperty()
+  @IsDate()
+  @IsNotEmpty({ message: 'Field "dueDate" is required.' })
+  due_date: Date;
 
   @ApiProperty()
   @IsBoolean()
-  @IsNotEmpty({ message: 'Field "supplier" is required' })
+  @IsNotEmpty({ message: 'Field "paid" is required' })
   paid: boolean;
 
   @ApiProperty()
   @IsOptional()
-  installments?: any[];
+  installments?: Installment[];
 
   @ApiProperty()
   observation: string;

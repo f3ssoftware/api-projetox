@@ -3,7 +3,6 @@ export interface WalletKey {
 }
 
 export interface Wallet extends WalletKey {
-  code: number;
   currency: string;
   name: string;
   createdAt: Date;

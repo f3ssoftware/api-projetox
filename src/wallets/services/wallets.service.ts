@@ -15,14 +15,31 @@ export class WalletsService {
     return this.model.scan().exec();
   }
 
-  async create(w: WalletDTO) {
+  async getById(id: string) {
+    return this.model.get({ id });
+  }
+
+  async create(userId: string, w: WalletDTO) {
     return this.model.create({
       id: randomUUID(),
-      code: 10000,
-      createdAt: new Date(w.createdAt),
+      createdAt: w.createdAt ? new Date(w.createdAt) : new Date(),
       currency: w.currency,
       name: w.name,
-      user_id: w.user_id,
+      user_id: userId,
     });
+  }
+
+  async update(id: string, w: WalletDTO, userId: string) {
+    this.model.update({
+      id: id,
+      createdAt: w.createdAt,
+      currency: w.currency,
+      name: w.name,
+      user_id: userId,
+    });
+  }
+
+  async delete(id: string) {
+    this.model.delete({ id });
   }
 }

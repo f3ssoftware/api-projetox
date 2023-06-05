@@ -1,21 +1,30 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletDTO {
-  @ApiProperty()
+  @ApiProperty({ required: true })
   @IsEnum(CurrencyEnum)
   currency: CurrencyEnum;
 
-  @ApiProperty()
+  @ApiProperty({ required: true })
   @IsNotEmpty({ message: 'Field "name" is required' })
   @IsString({ message: 'Field "name" should be a string' })
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @IsOptional()
   createdAt: Date;
 
-  @IsNotEmpty()
-  user_id: string;
+  // @ApiProperty({ required: true })
+  // @IsNotEmpty()
+  // user_id: string;
 }

@@ -5,9 +5,6 @@ export const TransactionSchema = new Schema({
     type: String,
     hashKey: true,
   },
-  code: {
-    type: Number,
-  },
   amount: {
     type: Number,
   },
@@ -27,7 +24,7 @@ export const TransactionSchema = new Schema({
     type: Array,
     required: false,
   },
-  supplier: {
+  reference: {
     type: String,
     required: false,
   },

@@ -7,15 +7,15 @@ export interface TransactionKey {
 }
 
 export interface Transaction extends TransactionKey {
-  code: number;
   wallet_id: string;
   amount: number;
-  createdAt: Date;
-  supplier: string;
+  created_at: Date;
   paid: boolean;
   type: TransactionType;
   observation?: string;
+  reference?: string;
   installments?: Installment[];
+  due_date: Date;
 }
 
 //     createdAt: new Date(),

@@ -10,21 +10,29 @@ export class TransactionsService {
     @InjectModel('Transaction')
     private transactionModel: Model<Transaction, TransactionKey>,
   ) {}
-  async listAll() {
+  async list() {
     return this.transactionModel.scan().exec();
   }
 
   async create(t: TransactionDTO) {
+    for (const installment of t.installments) {
+      if (installment.due_date > t.due_date) {
+        throw new Error(`Installment ${installment.due_date}: Invalid Date`);
+      }
+    }
+
     return this.transactionModel.create({
       id: randomUUID(),
       amount: t.amount,
-      code: 10000,
-      createdAt: new Date(t.createdAt),
+      created_at: new Date(t.createdAt),
       paid: t.paid,
       type: t.type,
-      supplier: t.supplier,
+      due_date: t.due_date,
       observation: t.observation,
-      installments: t.installments,
+      installments:
+        t.installments.length > 0
+          ? t.installments
+          : [{ amount: t.amount, number: 1, due_date: t.due_date }],
       wallet_id: t.wallet_id,
     });
   }

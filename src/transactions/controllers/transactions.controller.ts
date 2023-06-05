@@ -10,7 +10,7 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
   @Get('')
   public listAll() {
-    return this.transactionsService.listAll();
+    return this.transactionsService.list();
   }
 
   @Post('')
