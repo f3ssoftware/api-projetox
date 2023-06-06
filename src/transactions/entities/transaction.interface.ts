@@ -3,19 +3,19 @@ import { TransactionType } from 'aws-sdk/clients/lakeformation';
 import { Installment } from './installment.interface';
 
 export interface TransactionKey {
-  id: string;
+  id?: string;
 }
 
 export interface Transaction extends TransactionKey {
-  wallet_id: string;
-  amount: number;
-  created_at: Date;
-  paid: boolean;
-  type: TransactionType;
+  wallet_id?: string;
+  amount?: number;
+  created_at?: Date;
+  paid?: boolean;
+  type?: TransactionType;
   observation?: string;
   reference?: string;
   installments?: Installment[];
-  due_date: Date;
+  due_date?: Date;
 }
 
 //     createdAt: new Date(),

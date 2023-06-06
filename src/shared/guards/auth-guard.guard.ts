@@ -7,8 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import jwtDecode from 'jwt-decode';
-
-import { RolesEnum } from './../../authentication/enums/roles.enum';
+import { RolesEnum } from '../enums/roles.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -54,7 +53,7 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    const userRoles: string[] = decoded?.resource_access?.pagstar?.roles;
+    const userRoles: string[] = decoded?.resource_access?.pjx?.roles;
 
     let canActivate = false;
 

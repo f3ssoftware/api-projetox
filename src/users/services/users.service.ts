@@ -25,6 +25,7 @@ export class UsersService {
       kcUserRepresentation,
     );
 
+    await this.keycloakAdminService.userRoleMapping(kcUserId, 'free', 'pjx');
     return { userId: kcUserId };
   }
 }

@@ -7,7 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { WalletsService } from '../services/wallets.service';
 import { WalletDTO } from '../dtos/wallet.dto';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
@@ -21,24 +21,30 @@ export class WalletsController {
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
   @Get('')
-  public listAll() {
-    return this.walletService.listAll();
+  @ApiBearerAuth()
+  public listAll(@GetUser() userId) {
+    return this.walletService.listAll(userId);
   }
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
-  @Get(':id')
+  @ApiParam({ name: 'id', required: true, type: 'string' })
+  @Get('/:id')
+  @ApiBearerAuth()
   public detail(@Param('id') walletId) {
     return this.walletService.getById(walletId);
   }
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
   @Post('')
+  @ApiBearerAuth()
   public create(@GetUser() userId, @Body() w: WalletDTO) {
     return this.walletService.create(userId, w);
   }
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
-  @Put(':id')
+  @ApiParam({ name: 'id', required: true, type: 'string' })
+  @Put('/:id')
+  @ApiBearerAuth()
   public update(
     @GetUser() userId,
     @Param('id') walletId,
@@ -48,7 +54,9 @@ export class WalletsController {
   }
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
-  @Delete(':id')
+  @ApiParam({ name: 'id', required: true, type: 'string' })
+  @Delete('/:id')
+  @ApiBearerAuth()
   public delete(@Param('id') walletId) {
     return this.walletService.delete(walletId);
   }

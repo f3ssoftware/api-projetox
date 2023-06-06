@@ -8,6 +8,10 @@ export const TransactionSchema = new Schema({
   amount: {
     type: Number,
   },
+  due_date: {
+    type: Date,
+    default: new Date(),
+  },
   createdAt: {
     type: Date,
     default: new Date(),
@@ -27,6 +31,10 @@ export const TransactionSchema = new Schema({
   reference: {
     type: String,
     required: false,
+  },
+  type: {
+    type: String,
+    required: true,
   },
   wallet_id: {
     type: String,

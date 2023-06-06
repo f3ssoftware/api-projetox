@@ -1,22 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { Wallet, WalletKey } from '../entities/wallet.interface';
 import { WalletDTO } from '../dtos/wallet.dto';
 import { randomUUID } from 'crypto';
+import { TransactionsService } from '../../transactions/services/transactions.service';
 
 @Injectable()
 export class WalletsService {
   constructor(
     @InjectModel('Wallet')
     private model: Model<Wallet, WalletKey>,
+    @Inject(forwardRef(() => TransactionsService))
+    private transactionService: TransactionsService,
   ) {}
 
-  async listAll() {
-    return this.model.scan().exec();
+  async listAll(userId: string) {
+    return await this.model
+      .scan({
+        user_id: {
+          eq: userId,
+        },
+      })
+      .exec();
   }
 
   async getById(id: string) {
-    return this.model.get({ id });
+    const wallet = await this.model.get({ id });
+    const stats = await this.transactionService.stats(id);
+
+    return { ...wallet, stats };
   }
 
   async create(userId: string, w: WalletDTO) {
@@ -30,7 +42,7 @@ export class WalletsService {
   }
 
   async update(id: string, w: WalletDTO, userId: string) {
-    this.model.update({
+    return await this.model.update({
       id: id,
       createdAt: w.createdAt,
       currency: w.currency,
@@ -40,6 +52,6 @@ export class WalletsService {
   }
 
   async delete(id: string) {
-    this.model.delete({ id });
+    return await this.model.delete({ id });
   }
 }
