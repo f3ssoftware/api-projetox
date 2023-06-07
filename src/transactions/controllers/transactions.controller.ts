@@ -13,7 +13,7 @@ import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesEnum } from '../../shared/enums/roles.enum';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 
-@Controller('transactions')
+@Controller({ version: ['1'], path: 'transactions' })
 @ApiTags('Transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
