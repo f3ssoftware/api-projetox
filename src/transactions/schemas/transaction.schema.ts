@@ -1,4 +1,5 @@
 import { Schema } from 'dynamoose';
+import { InstallmentSchema } from './installment.schema';
 
 export const TransactionSchema = new Schema({
   id: {
@@ -26,6 +27,7 @@ export const TransactionSchema = new Schema({
   },
   installments: {
     type: Array,
+    schema: [InstallmentSchema],
     required: false,
   },
   reference: {

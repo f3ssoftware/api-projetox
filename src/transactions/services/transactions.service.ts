@@ -12,6 +12,8 @@ import { randomUUID } from 'crypto';
 import { TransactionType } from '../enums/transaction-types.enum';
 import { contains } from 'class-validator';
 import { WalletsService } from '../../wallets/services/wallets.service';
+import { TransactionFilterDto } from '../dtos/transaction-filter.dto';
+import { Recurrency, RecurrencyKey } from '../entities/recurrency.interface';
 @Injectable()
 export class TransactionsService {
   constructor(
@@ -20,33 +22,64 @@ export class TransactionsService {
     @Inject(forwardRef(() => WalletsService))
     private readonly walletService: WalletsService,
   ) {}
-  async listBy(userId: string, t: Transaction) {
-    if (!(await this.checkWalletOwner(userId, t.wallet_id))) {
-      console.log('CAINDO NO ERROR');
+
+  async listBy(
+    userId: string,
+    wallet_id: string,
+    filter: TransactionFilterDto,
+  ) {
+    if (!(await this.checkWalletOwner(userId, wallet_id))) {
       throw new UnauthorizedException(
         'Usuário não possui acesso aos dados dessa carteira',
       );
     }
 
-    return this.transactionModel
-      .scan({
-        wallet_id: { eq: t.wallet_id },
-      })
-      .exec();
+    let result = this.transactionModel.scan('wallet_id').eq(wallet_id);
+    // let result = this.transactionModel.query('wallet_id').eq(wallet_id);
+
+    if (filter.startDate && filter.endDate) {
+      result = result
+        .where('due_date')
+        .gt(new Date(filter.startDate).getTime())
+        .and()
+        .where('due_date')
+        .lt(new Date(filter.endDate).getTime());
+    }
+
+    if (filter.minAmount && filter.maxAmount) {
+      result
+        .where('amount')
+        .between(Number(filter.minAmount), Number(filter.maxAmount));
+    }
+
+    if (filter.reference) {
+      result.where('reference').contains(filter.reference);
+    }
+
+    // result.sort(filter.sortOrder);
+
+    return result.exec();
   }
 
   async create(t: TransactionDTO) {
-    for (const installment of t.installments) {
-      if (installment.due_date > t.due_date) {
-        throw new ConflictException(
-          `Installment ${installment.due_date}: Invalid Date`,
-        );
+    if (t.installments) {
+      for (const installment of t.installments) {
+        if (installment.due_date > t.due_date) {
+          throw new ConflictException(
+            `Installment ${installment.due_date}: Invalid Date`,
+          );
+        }
+
+        installment.due_date = new Date(installment.due_date);
       }
     }
 
     return this.transactionModel.create({
       id: randomUUID(),
-      amount: t.amount,
+      amount:
+        t.type === TransactionType.PAYMENT && t.amount > 0
+          ? t.amount * -1
+          : t.amount,
       created_at: new Date(t.createdAt),
       paid: t.paid,
       type: t.type,
@@ -71,20 +104,48 @@ export class TransactionsService {
       .exec();
     let sum = 0;
     let expiredTransactionsQuantity = 0;
+    let expiredTransactionsAmount = 0;
+    let incomeTransactionsQuantity = 0;
+    let incomeTransactionsAmount = 0;
+    let outcomeTransactionsQuantity = 0;
+    let outcomeTransactionsAmount = 0;
     for (const t of transactions) {
-      sum += t.amount;
+      if (t.paid) {
+        sum += t.amount;
+      }
+
       if (
         new Date(t.due_date) < new Date() &&
         !t.paid &&
-        t.type === 'BILLING'
+        t.type === 'PAYMENT'
       ) {
         expiredTransactionsQuantity++;
+        expiredTransactionsAmount = expiredTransactionsAmount + t.amount;
+      }
+
+      if (t.type === 'BILLING' && !t.paid) {
+        incomeTransactionsQuantity++;
+        incomeTransactionsAmount = incomeTransactionsAmount + t.amount;
+      }
+
+      if (
+        new Date(t.due_date) > new Date() &&
+        t.type === 'PAYMENT' &&
+        !t.paid
+      ) {
+        outcomeTransactionsQuantity++;
+        outcomeTransactionsAmount = outcomeTransactionsAmount + t.amount;
       }
     }
 
     return {
       walletBalance: sum,
-      walletexpiredBillingQuantity: expiredTransactionsQuantity,
+      walletExpiredBillingQuantity: expiredTransactionsQuantity,
+      walletExpiredBillingAmount: expiredTransactionsAmount,
+      walletIncomeBillingQuantity: incomeTransactionsQuantity,
+      walletIncomeBillingAmount: incomeTransactionsAmount,
+      walletOutcomeBillingQuantity: outcomeTransactionsQuantity,
+      walletOutcomeBillingAmount: outcomeTransactionsAmount,
     };
   }
 

@@ -1,21 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsArray,
-  IsBoolean,
-  IsDate,
-  IsDateString,
-  IsEnum,
-  IsNotEmpty,
   IsNumber,
+  IsNotEmpty,
   IsOptional,
+  IsEnum,
   IsString,
+  IsDateString,
+  IsBoolean,
+  IsArray,
   IsUUID,
-  isNotEmpty,
 } from 'class-validator';
-import { TransactionType } from '../enums/transaction-types.enum';
 import { Installment } from '../entities/installment.interface';
+import { TransactionType } from '../enums/transaction-types.enum';
+import { FrequencyType } from '../enums/frequency-type.enum';
 
-export class TransactionDTO {
+export class RecurrencyDto {
   @ApiProperty()
   @IsNumber({ allowNaN: false })
   @IsNotEmpty({ message: 'Field "amount" is required' })
@@ -24,6 +23,11 @@ export class TransactionDTO {
   @ApiProperty()
   @IsOptional()
   createdAt: Date;
+
+  @ApiProperty()
+  @IsEnum(FrequencyType)
+  @IsNotEmpty({ message: 'Field "frequency" is required' })
+  frequency: FrequencyType;
 
   @ApiProperty()
   @IsEnum(TransactionType)
@@ -37,8 +41,8 @@ export class TransactionDTO {
 
   @ApiProperty()
   @IsDateString()
-  @IsNotEmpty({ message: 'Field "dueDate" is required.' })
-  due_date: Date;
+  @IsNotEmpty({ message: 'Field "base_date" is required.' })
+  base_date: Date;
 
   @ApiProperty()
   @IsBoolean()

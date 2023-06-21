@@ -5,14 +5,21 @@ export const WalletSchema = new Schema({
     type: String,
     hashKey: true,
   },
+  active: {
+    type: Boolean,
+    default: true,
+    required: true,
+  },
   currency: {
     type: String,
   },
   user_id: {
     type: String,
+    required: true,
   },
   name: {
     type: String,
+    required: true,
   },
   createdAt: {
     type: Date,

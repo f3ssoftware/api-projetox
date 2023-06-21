@@ -66,7 +66,6 @@ export class KeycloakAdminService {
         `${this.url}/clients/${id}/roles`,
         this.buildKCHeader(token),
       );
-
       return response?.data;
     } catch (err) {
       throw new HttpException(
@@ -78,12 +77,13 @@ export class KeycloakAdminService {
 
   async userRoleMapping(kcUserId: string, role: any, clientId?: string) {
     try {
+      console.log('initial clientId: ', clientId);
       if (!clientId?.length) {
         const clients = await this.listRealmClients();
 
-        const pagstarClient = clients.find((c) => c.clientId === 'pagstar');
+        const client = clients.find((c) => c.clientId === 'pjx');
 
-        clientId = pagstarClient.id;
+        clientId = client.id;
       }
 
       const roles = await this.listClientAvailableRoles(clientId);

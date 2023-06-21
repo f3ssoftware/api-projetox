@@ -16,11 +16,15 @@ export class WalletsService {
 
   async listAll(userId: string) {
     return await this.model
-      .scan({
-        user_id: {
-          eq: userId,
-        },
-      })
+      .scan('user_id')
+      .eq(userId)
+      .where('active')
+      .eq(true)
+      // .scan({
+      //   user_id: {
+      //     eq: userId,
+      //   },
+      // })
       .exec();
   }
 
@@ -34,6 +38,7 @@ export class WalletsService {
   async create(userId: string, w: WalletDTO) {
     return this.model.create({
       id: randomUUID(),
+      active: true,
       createdAt: w.createdAt ? new Date(w.createdAt) : new Date(),
       currency: w.currency,
       name: w.name,
@@ -44,6 +49,7 @@ export class WalletsService {
   async update(id: string, w: WalletDTO, userId: string) {
     return await this.model.update({
       id: id,
+      active: true,
       createdAt: w.createdAt,
       currency: w.currency,
       name: w.name,
@@ -52,6 +58,8 @@ export class WalletsService {
   }
 
   async delete(id: string) {
-    return await this.model.delete({ id });
+    const w = await this.model.get({ id });
+    w.active = false;
+    return await this.model.update(w);
   }
 }

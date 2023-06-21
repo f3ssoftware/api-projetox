@@ -13,6 +13,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { WalletsModule } from './wallets/wallets.module';
+import { RecurrencyController } from './transactions/controllers/recurrency.controller';
 
 @Module({
   imports: [

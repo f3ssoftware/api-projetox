@@ -4,6 +4,7 @@ export interface WalletKey {
 
 export interface Wallet extends WalletKey {
   currency: string;
+  active: boolean;
   name: string;
   createdAt: Date;
   user_id: string;
