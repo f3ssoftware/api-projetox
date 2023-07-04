@@ -9,7 +9,6 @@ export interface Recurrency extends RecurrencyKey {
   frequency: FrequencyType;
   base_date: Date;
   active: boolean;
-  paid: boolean;
   amount: number;
   reference: string;
   type: TransactionType;

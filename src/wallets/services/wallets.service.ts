@@ -50,7 +50,7 @@ export class WalletsService {
     return await this.model.update({
       id: id,
       active: true,
-      createdAt: w.createdAt,
+      createdAt: new Date(w.createdAt),
       currency: w.currency,
       name: w.name,
       user_id: userId,

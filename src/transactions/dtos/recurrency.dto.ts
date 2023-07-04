@@ -9,6 +9,7 @@ import {
   IsBoolean,
   IsArray,
   IsUUID,
+  MinDate,
 } from 'class-validator';
 import { Installment } from '../entities/installment.interface';
 import { TransactionType } from '../enums/transaction-types.enum';
@@ -19,10 +20,6 @@ export class RecurrencyDto {
   @IsNumber({ allowNaN: false })
   @IsNotEmpty({ message: 'Field "amount" is required' })
   amount: number;
-
-  @ApiProperty()
-  @IsOptional()
-  createdAt: Date;
 
   @ApiProperty()
   @IsEnum(FrequencyType)
@@ -41,24 +38,11 @@ export class RecurrencyDto {
 
   @ApiProperty()
   @IsDateString()
+  @MinDate(new Date())
   @IsNotEmpty({ message: 'Field "base_date" is required.' })
   base_date: Date;
-
-  @ApiProperty()
-  @IsBoolean()
-  @IsNotEmpty({ message: 'Field "paid" is required' })
-  paid: boolean;
-
-  @ApiProperty()
-  @IsArray({ message: 'Field "installments" is required' })
-  installments?: Installment[];
 
   @ApiPropertyOptional()
   @IsOptional()
   observation: string;
-
-  @ApiProperty()
-  @IsUUID()
-  @IsNotEmpty({ message: 'Field "wallet_id" is required' })
-  wallet_id: string;
 }

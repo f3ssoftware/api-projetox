@@ -11,16 +11,15 @@ export class RecurrencyService {
     private recurrencyModel: Model<Recurrency, RecurrencyKey>,
   ) {}
 
-  async create(r: RecurrencyDto) {
+  async create(walletId: string, r: RecurrencyDto) {
     return await this.recurrencyModel.create({
       id: randomUUID(),
-      wallet_id: r.wallet_id,
+      wallet_id: walletId,
       active: true,
       amount: r.amount,
       base_date: new Date(r.base_date),
       frequency: r.frequency,
       observation: r.observation,
-      paid: r.paid,
       reference: r.reference,
       type: r.type,
     });
@@ -31,8 +30,24 @@ export class RecurrencyService {
       .scan('wallet_id')
       .eq(walletId)
       .where('active')
-      .eq(true);
+      .eq(true)
+      .exec();
 
     return recurrencies;
+  }
+
+  async update(r: RecurrencyDto, recurrency_id: string, walletId: string) {
+    const toUpdate: Recurrency = {
+      id: recurrency_id,
+      active: true,
+      wallet_id: walletId,
+      ...r,
+    };
+
+    return await this.recurrencyModel.update(toUpdate);
+  }
+
+  async detail(recurrency_id: string) {
+    return await this.recurrencyModel.get({ id: recurrency_id });
   }
 }

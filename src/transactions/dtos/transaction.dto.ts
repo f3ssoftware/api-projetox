@@ -14,6 +14,7 @@ import {
 } from 'class-validator';
 import { TransactionType } from '../enums/transaction-types.enum';
 import { Installment } from '../entities/installment.interface';
+import { InstallmentDto } from './installment.dto';
 
 export class TransactionDTO {
   @ApiProperty()
@@ -47,7 +48,7 @@ export class TransactionDTO {
 
   @ApiProperty()
   @IsArray({ message: 'Field "installments" is required' })
-  installments?: Installment[];
+  installments?: InstallmentDto[];
 
   @ApiPropertyOptional()
   @IsOptional()
