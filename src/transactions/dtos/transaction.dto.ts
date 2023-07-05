@@ -23,10 +23,6 @@ export class TransactionDTO {
   amount: number;
 
   @ApiProperty()
-  @IsOptional()
-  createdAt: Date;
-
-  @ApiProperty()
   @IsEnum(TransactionType)
   @IsNotEmpty({ message: 'Field "type" is required' })
   type: TransactionType;

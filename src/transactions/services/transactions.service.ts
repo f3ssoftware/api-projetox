@@ -80,7 +80,7 @@ export class TransactionsService {
         t.type === TransactionType.PAYMENT && t.amount > 0
           ? t.amount * -1
           : t.amount,
-      created_at: new Date(t.createdAt),
+      created_at: new Date(),
       paid: t.paid,
       type: t.type,
       due_date: new Date(t.due_date),

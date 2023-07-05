@@ -10,10 +10,12 @@ import {
   IsArray,
   IsUUID,
   MinDate,
+  IsDate,
 } from 'class-validator';
 import { Installment } from '../entities/installment.interface';
 import { TransactionType } from '../enums/transaction-types.enum';
 import { FrequencyType } from '../enums/frequency-type.enum';
+import { Transform } from 'class-transformer';
 
 export class RecurrencyDto {
   @ApiProperty()
@@ -37,8 +39,15 @@ export class RecurrencyDto {
   reference: string;
 
   @ApiProperty()
-  @IsDateString()
-  @MinDate(new Date())
+  @IsDate()
+  @Transform(({ value }) => new Date(value))
+  @MinDate(
+    new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate() - 1,
+    ),
+  )
   @IsNotEmpty({ message: 'Field "base_date" is required.' })
   base_date: Date;
 

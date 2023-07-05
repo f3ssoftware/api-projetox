@@ -108,7 +108,6 @@ export class RecurrencyService {
   private createTransactionByRecurrency(recurrency: Recurrency) {
     this.transactionsService.create({
       amount: recurrency.amount,
-      createdAt: new Date(),
       due_date: new Date(),
       observation: recurrency.observation,
       paid: false,
