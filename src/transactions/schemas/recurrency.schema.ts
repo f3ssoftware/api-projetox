@@ -35,6 +35,10 @@ export const RecurrencySchema = new Schema({
   observation: {
     type: String,
   },
+  includeWeekends: {
+    type: Boolean,
+    default: false,
+  },
   wallet_id: {
     type: String,
     required: true,

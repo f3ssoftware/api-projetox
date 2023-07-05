@@ -4,6 +4,7 @@ import { Wallet, WalletKey } from '../entities/wallet.interface';
 import { WalletDTO } from '../dtos/wallet.dto';
 import { randomUUID } from 'crypto';
 import { TransactionsService } from '../../transactions/services/transactions.service';
+import { WalletFilterDto } from '../dtos/wallet-filter.dto';
 
 @Injectable()
 export class WalletsService {
@@ -14,28 +15,37 @@ export class WalletsService {
     private transactionService: TransactionsService,
   ) {}
 
-  async listAll(userId: string) {
-    return await this.model
+  public async listAllByUser(userId: string, filter?: WalletFilterDto) {
+    const result = this.model
       .scan('user_id')
       .eq(userId)
       .where('active')
-      .eq(true)
-      // .scan({
-      //   user_id: {
-      //     eq: userId,
-      //   },
-      // })
-      .exec();
+      .eq(true);
+    // .scan({
+    //   user_id: {
+    //     eq: userId,
+    //   },
+    // })
+
+    if (filter.name) {
+      result.where('name').contains(filter.name);
+    }
+
+    return result.exec();
   }
 
-  async getById(id: string) {
+  public async listAll() {
+    return this.model.scan().where('active').eq(true).exec();
+  }
+
+  public async getById(id: string) {
     const wallet = await this.model.get({ id });
     const stats = await this.transactionService.stats(id);
 
     return { ...wallet, stats };
   }
 
-  async create(userId: string, w: WalletDTO) {
+  public async create(userId: string, w: WalletDTO) {
     return this.model.create({
       id: randomUUID(),
       active: true,
@@ -46,7 +56,7 @@ export class WalletsService {
     });
   }
 
-  async update(id: string, w: WalletDTO, userId: string) {
+  public async update(id: string, w: WalletDTO, userId: string) {
     return await this.model.update({
       id: id,
       active: true,

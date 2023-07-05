@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { WalletsService } from '../services/wallets.service';
@@ -13,6 +14,7 @@ import { WalletDTO } from '../dtos/wallet.dto';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { RolesEnum } from '../../shared/enums/roles.enum';
 import { Roles } from '../../shared/decorators/roles.decorator';
+import { WalletFilterDto } from '../dtos/wallet-filter.dto';
 
 @Controller({ version: ['1'], path: 'wallets' })
 @ApiTags('Wallets')
@@ -22,8 +24,8 @@ export class WalletsController {
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
   @Get('')
   @ApiBearerAuth()
-  public listAll(@GetUser() userId) {
-    return this.walletService.listAll(userId);
+  public listAll(@GetUser() userId, @Query() filter: WalletFilterDto) {
+    return this.walletService.listAllByUser(userId, filter);
   }
 
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)

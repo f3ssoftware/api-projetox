@@ -45,4 +45,8 @@ export class RecurrencyDto {
   @ApiPropertyOptional()
   @IsOptional()
   observation: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  includeWeekends: boolean;
 }

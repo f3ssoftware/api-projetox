@@ -13,5 +13,6 @@ export interface Recurrency extends RecurrencyKey {
   reference: string;
   type: TransactionType;
   observation: string;
+  includeWeekends: boolean;
   wallet_id: string;
 }
