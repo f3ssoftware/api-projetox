@@ -12,6 +12,10 @@ export const TransactionSchema = new Schema({
   due_date: {
     type: Date,
     default: new Date(),
+    index: {
+      name: 'due-date-index',
+    },
+    rangeKey: true,
   },
   createdAt: {
     type: Date,
@@ -38,7 +42,13 @@ export const TransactionSchema = new Schema({
     type: String,
     required: true,
   },
+  parent_transaction_id: {
+    type: String,
+  },
   wallet_id: {
     type: String,
+    index: {
+      name: 'wallet-id-index',
+    },
   },
 });

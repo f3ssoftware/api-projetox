@@ -10,11 +10,13 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
   isNotEmpty,
 } from 'class-validator';
 import { TransactionType } from '../enums/transaction-types.enum';
 import { Installment } from '../entities/installment.interface';
 import { InstallmentDto } from './installment.dto';
+import { Type } from 'class-transformer';
 
 export class TransactionDTO {
   @ApiProperty()
@@ -42,8 +44,11 @@ export class TransactionDTO {
   @IsNotEmpty({ message: 'Field "paid" is required' })
   paid: boolean;
 
-  @ApiProperty()
-  @IsArray({ message: 'Field "installments" is required' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InstallmentDto)
   installments?: InstallmentDto[];
 
   @ApiPropertyOptional()

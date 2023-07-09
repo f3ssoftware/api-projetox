@@ -16,6 +16,7 @@ export interface Transaction extends TransactionKey {
   reference?: string;
   installments?: Installment[];
   due_date?: Date;
+  parent_transaction_id?: string;
 }
 
 //     createdAt: new Date(),

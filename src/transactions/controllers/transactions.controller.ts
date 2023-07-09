@@ -31,7 +31,8 @@ export class TransactionsController {
   }
 
   @Post('')
-  public create(@Body() t: TransactionDTO) {
-    return this.transactionsService.create(t);
+  @ApiBearerAuth()
+  public create(@GetUser() userId, @Body() t: TransactionDTO) {
+    return this.transactionsService.create(userId, t);
   }
 }

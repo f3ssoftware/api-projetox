@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { Recurrency, RecurrencyKey } from '../entities/recurrency.interface';
 import { RecurrencyDto } from '../dtos/recurrency.dto';
@@ -15,6 +15,7 @@ import { Cron } from '@nestjs/schedule';
 export class RecurrencyService {
   constructor(
     private readonly transactionsService: TransactionsService,
+    private readonly walletService: WalletsService,
     @InjectModel('Recurrency')
     private recurrencyModel: Model<Recurrency, RecurrencyKey>,
   ) {}
@@ -34,7 +35,12 @@ export class RecurrencyService {
     });
   }
 
-  async list(walletId: string) {
+  async list(userId, walletId: string) {
+    if (!(await this.checkWalletOwner(userId, walletId))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
     const recurrencies = await this.recurrencyModel
       .scan('wallet_id')
       .eq(walletId)
@@ -105,8 +111,9 @@ export class RecurrencyService {
     }
   }
 
-  private createTransactionByRecurrency(recurrency: Recurrency) {
-    this.transactionsService.create({
+  private async createTransactionByRecurrency(recurrency: Recurrency) {
+    const wallet = await this.walletService.getById(recurrency.wallet_id);
+    this.transactionsService.create(wallet.user_id, {
       amount: recurrency.amount,
       due_date: new Date(),
       observation: recurrency.observation,
@@ -120,5 +127,10 @@ export class RecurrencyService {
 
   private isWeekend() {
     return new Date().getDay() == 6 || new Date().getDay() == 0;
+  }
+
+  private async checkWalletOwner(userId: string, walletId: string) {
+    const wallet = await this.walletService.getById(walletId);
+    return wallet.user_id === userId;
   }
 }

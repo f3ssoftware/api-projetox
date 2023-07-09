@@ -14,6 +14,9 @@ import { contains } from 'class-validator';
 import { WalletsService } from '../../wallets/services/wallets.service';
 import { TransactionFilterDto } from '../dtos/transaction-filter.dto';
 import { Recurrency, RecurrencyKey } from '../entities/recurrency.interface';
+import { SortOrder } from 'dynamoose/dist/General';
+import { Installment } from '../entities/installment.interface';
+
 @Injectable()
 export class TransactionsService {
   constructor(
@@ -40,10 +43,10 @@ export class TransactionsService {
     if (filter.startDate && filter.endDate) {
       result = result
         .where('due_date')
-        .gt(new Date(filter.startDate).getTime())
+        .ge(new Date(filter.startDate).getTime())
         .and()
         .where('due_date')
-        .lt(new Date(filter.endDate).getTime());
+        .le(new Date(filter.endDate).getTime());
     }
 
     if (filter.minAmount && filter.maxAmount) {
@@ -53,15 +56,23 @@ export class TransactionsService {
     }
 
     if (filter.reference) {
-      result.where('reference').contains(filter.reference);
+      result.where('reference').contains(filter.reference.toUpperCase());
     }
 
-    // result.sort(filter.sortOrder);
+    // if (filter.sortBy && filter.sortOrder) {
+    //   result.sort();
+    // }
 
-    return result.exec();
+    return this.sortBy(filter.sortBy, filter.sortOrder, await result.exec());
   }
 
-  async create(t: TransactionDTO) {
+  async create(userId: string, t: TransactionDTO) {
+    if (!(await this.checkWalletOwner(userId, t.wallet_id))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
+
     if (t.installments) {
       for (const installment of t.installments) {
         if (installment.due_date > t.due_date) {
@@ -74,7 +85,7 @@ export class TransactionsService {
       }
     }
 
-    return this.transactionModel.create({
+    const savedTransaction = await this.transactionModel.create({
       id: randomUUID(),
       amount:
         t.type === TransactionType.PAYMENT && t.amount > 0
@@ -84,14 +95,25 @@ export class TransactionsService {
       paid: t.paid,
       type: t.type,
       due_date: new Date(t.due_date),
-      reference: t.reference,
+      reference: t.reference.toUpperCase(),
       observation: t.observation,
       installments:
-        t.installments.length > 0
-          ? t.installments
-          : [{ amount: t.amount, number: 1, due_date: t.due_date }],
+        t?.installments?.length > 0
+          ? t?.installments
+          : [
+              {
+                amount: t.amount,
+                number: 1,
+                due_date: new Date(t.due_date),
+                paid: t.paid,
+              },
+            ],
       wallet_id: t.wallet_id,
     });
+
+    this.generateAffiliatedTransactions(savedTransaction);
+
+    return savedTransaction;
   }
 
   async stats(walletId: string) {
@@ -152,5 +174,65 @@ export class TransactionsService {
   private async checkWalletOwner(userId: string, walletId: string) {
     const wallet = await this.walletService.getById(walletId);
     return wallet.user_id === userId;
+  }
+
+  private sortBy(attributeName: string, order: SortOrder, elements: any[]) {
+    switch (order) {
+      case SortOrder.ascending:
+        {
+          elements.sort((a, b) => {
+            if (a[attributeName] < b[attributeName]) {
+              return -1;
+            }
+            if (a[attributeName] > b[attributeName]) {
+              return 1;
+            }
+            return 0;
+          });
+        }
+        break;
+      case SortOrder.descending:
+        {
+          elements.sort((a, b) => {
+            if (a[attributeName] > b[attributeName]) {
+              return -1;
+            }
+            if (a[attributeName] < b[attributeName]) {
+              return 1;
+            }
+            return 0;
+          });
+        }
+        break;
+      default: {
+        elements.sort((a, b) => {
+          if (a.due_date > b.due_date) {
+            return -1;
+          }
+          if (a.due_date < b.due_date) {
+            return 1;
+          }
+          return 0;
+        });
+      }
+    }
+
+    return elements;
+  }
+
+  private generateAffiliatedTransactions(parentTransaction: Transaction) {
+    const installments = parentTransaction.installments;
+    for (const i of installments) {
+      this.transactionModel.create({
+        amount: i.amount,
+        due_date: i.due_date,
+        reference: `${parentTransaction.reference} ${i.number}/${installments.length}`,
+        paid: i.paid,
+        type: parentTransaction.type,
+        observation: parentTransaction.observation,
+        wallet_id: parentTransaction.wallet_id,
+        parent_transaction_id: parentTransaction.id,
+      });
+    }
   }
 }

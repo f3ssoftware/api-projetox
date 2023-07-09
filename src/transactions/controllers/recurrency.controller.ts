@@ -12,6 +12,7 @@ import { RecurrencyDto } from '../dtos/recurrency.dto';
 import { RecurrencyService } from '../services/recurrency.service';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesEnum } from '../../shared/enums/roles.enum';
+import { GetUser } from '../../shared/decorators/get-user.decorator';
 
 @Controller({ version: ['1'], path: 'recurrency' })
 @ApiTags('Recurrency')
@@ -32,7 +33,10 @@ export class RecurrencyController {
   @Get('/:wallet_id')
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
   @ApiBearerAuth()
-  public async list(@Param('wallet_id') wallet_id: string) {
-    return await this.recurrencyService.list(wallet_id);
+  public async list(
+    @GetUser() userId: string,
+    @Param('wallet_id') wallet_id: string,
+  ) {
+    return await this.recurrencyService.list(userId, wallet_id);
   }
 }

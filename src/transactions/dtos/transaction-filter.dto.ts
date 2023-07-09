@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { SortOrder } from '../../shared/enums/sort-order.enum';
+import { SortOrder } from 'dynamoose/dist/General';
 
 export class TransactionFilterDto {
   //   @ApiProperty()
