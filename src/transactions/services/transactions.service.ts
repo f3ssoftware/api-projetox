@@ -16,6 +16,7 @@ import { TransactionFilterDto } from '../dtos/transaction-filter.dto';
 import { Recurrency, RecurrencyKey } from '../entities/recurrency.interface';
 import { SortOrder } from 'dynamoose/dist/General';
 import { Installment } from '../entities/installment.interface';
+import { InstallmentDto } from '../dtos/installment.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -74,6 +75,7 @@ export class TransactionsService {
     }
 
     if (t.installments) {
+      let sumInstallments = 0;
       for (const installment of t.installments) {
         if (installment.due_date > t.due_date) {
           throw new ConflictException(
@@ -81,7 +83,15 @@ export class TransactionsService {
           );
         }
 
+        sumInstallments = sumInstallments + installment.amount;
+
         installment.due_date = new Date(installment.due_date);
+      }
+
+      if (sumInstallments !== t.amount) {
+        throw new ConflictException(
+          `Transaction amount and Installments amount sum are divergent.`,
+        );
       }
     }
 
@@ -99,7 +109,7 @@ export class TransactionsService {
       observation: t.observation,
       installments:
         t?.installments?.length > 0
-          ? t?.installments
+          ? this.parseInstallments(t?.installments)
           : [
               {
                 amount: t.amount,
@@ -234,5 +244,19 @@ export class TransactionsService {
         parent_transaction_id: parentTransaction.id,
       });
     }
+  }
+
+  private parseInstallments(installmentDtoList: InstallmentDto[]) {
+    const installments: Installment[] = [];
+    for (const dto of installmentDtoList) {
+      installments.push({
+        amount: dto.amount,
+        number: dto.number,
+        due_date: dto.due_date,
+        paid: dto.paid,
+      });
+    }
+
+    return installments;
   }
 }
