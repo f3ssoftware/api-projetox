@@ -13,6 +13,7 @@ import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesEnum } from '../../shared/enums/roles.enum';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { TransactionFilterDto } from '../dtos/transaction-filter.dto';
+import { InterWalletDto } from '../dtos/inter-wallet.dto';
 
 @Controller({ version: ['1'], path: 'transactions' })
 @ApiTags('Transactions')
@@ -34,5 +35,17 @@ export class TransactionsController {
   @ApiBearerAuth()
   public create(@GetUser() userId, @Body() t: TransactionDTO) {
     return this.transactionsService.create(userId, t);
+  }
+
+  @Post('inter-wallet')
+  @ApiBearerAuth()
+  public createInterWalletTransfer(
+    @GetUser() userId,
+    @Body() interWallet: InterWalletDto,
+  ) {
+    return this.transactionsService.createInterWalletTransaction(
+      userId,
+      interWallet,
+    );
   }
 }

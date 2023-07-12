@@ -17,6 +17,7 @@ import { Recurrency, RecurrencyKey } from '../entities/recurrency.interface';
 import { SortOrder } from 'dynamoose/dist/General';
 import { Installment } from '../entities/installment.interface';
 import { InstallmentDto } from '../dtos/installment.dto';
+import { InterWalletDto } from '../dtos/inter-wallet.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -124,6 +125,54 @@ export class TransactionsService {
     this.generateAffiliatedTransactions(savedTransaction);
 
     return savedTransaction;
+  }
+
+  async createInterWalletTransaction(
+    userId: string,
+    interWalletDto: InterWalletDto,
+  ) {
+    if (!(await this.checkWalletOwner(userId, interWalletDto.wallet_id))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
+
+    const t1 = await this.transactionModel.create({
+      amount: interWalletDto.amount,
+      created_at: new Date(),
+      installments: [
+        {
+          amount: interWalletDto.amount,
+          due_date: interWalletDto.due_date,
+          number: 1,
+          paid: true,
+        },
+      ],
+      paid: true,
+      reference: interWalletDto.reference,
+      type: TransactionType.PAYMENT,
+      due_date: interWalletDto.due_date,
+      wallet_id: interWalletDto.wallet_id,
+    });
+
+    const t2 = await this.transactionModel.create({
+      amount: interWalletDto.amount,
+      created_at: new Date(),
+      installments: [
+        {
+          amount: interWalletDto.amount,
+          due_date: interWalletDto.due_date,
+          number: 1,
+          paid: true,
+        },
+      ],
+      paid: true,
+      reference: `*INTERWALLET ${interWalletDto.reference}`,
+      observation: `INTER WALLET TRANSFER FROM ${interWalletDto.wallet_id}`,
+      type: TransactionType.BILLING,
+      due_date: interWalletDto.due_date,
+      wallet_id: interWalletDto.destinatary_wallet_id,
+    });
   }
 
   async stats(walletId: string) {
