@@ -8,13 +8,14 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { WalletsService } from '../services/wallets.service';
 import { WalletDTO } from '../dtos/wallet.dto';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { RolesEnum } from '../../shared/enums/roles.enum';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { WalletFilterDto } from '../dtos/wallet-filter.dto';
+import { SortOrder } from 'dynamoose/dist/General';
 
 @Controller({ version: ['1'], path: 'wallets' })
 @ApiTags('Wallets')

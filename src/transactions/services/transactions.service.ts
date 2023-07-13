@@ -138,12 +138,13 @@ export class TransactionsService {
     }
 
     const t1 = await this.transactionModel.create({
+      id: randomUUID(),
       amount: interWalletDto.amount,
       created_at: new Date(),
       installments: [
         {
           amount: interWalletDto.amount,
-          due_date: interWalletDto.due_date,
+          due_date: new Date(interWalletDto.due_date),
           number: 1,
           paid: true,
         },
@@ -151,17 +152,18 @@ export class TransactionsService {
       paid: true,
       reference: interWalletDto.reference,
       type: TransactionType.PAYMENT,
-      due_date: interWalletDto.due_date,
+      due_date: new Date(interWalletDto.due_date),
       wallet_id: interWalletDto.wallet_id,
     });
 
     const t2 = await this.transactionModel.create({
+      id: randomUUID(),
       amount: interWalletDto.amount,
       created_at: new Date(),
       installments: [
         {
           amount: interWalletDto.amount,
-          due_date: interWalletDto.due_date,
+          due_date: new Date(interWalletDto.due_date),
           number: 1,
           paid: true,
         },
@@ -170,9 +172,11 @@ export class TransactionsService {
       reference: `*INTERWALLET ${interWalletDto.reference}`,
       observation: `INTER WALLET TRANSFER FROM ${interWalletDto.wallet_id}`,
       type: TransactionType.BILLING,
-      due_date: interWalletDto.due_date,
+      due_date: new Date(interWalletDto.due_date),
       wallet_id: interWalletDto.destinatary_wallet_id,
     });
+
+    return { t1, t2 };
   }
 
   async stats(walletId: string) {

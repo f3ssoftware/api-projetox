@@ -21,14 +21,10 @@ export class WalletsService {
       .eq(userId)
       .where('active')
       .eq(true);
-    // .scan({
-    //   user_id: {
-    //     eq: userId,
-    //   },
-    // })
 
+    console.log('FILTER NAME:', filter.name);
     if (filter.name) {
-      result.where('name').contains(filter.name);
+      result.where('name').contains(filter.name.toUpperCase());
     }
 
     return result.exec();
