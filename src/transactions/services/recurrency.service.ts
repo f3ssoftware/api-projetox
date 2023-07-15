@@ -35,6 +35,15 @@ export class RecurrencyService {
     });
   }
 
+  async findByWallet(walletId: string) {
+    return await this.recurrencyModel
+      .scan('wallet_id')
+      .eq(walletId)
+      .where('active')
+      .eq(true)
+      .exec();
+  }
+
   async list(userId, walletId: string) {
     if (!(await this.checkWalletOwner(userId, walletId))) {
       throw new UnauthorizedException(
@@ -66,7 +75,7 @@ export class RecurrencyService {
     return await this.recurrencyModel.get({ id: recurrency_id });
   }
 
-  @Cron('0 00 07 * * 1-7')
+  @Cron('00 10 * * *')
   public async createTransactionAuto() {
     const recurrencies = await this.recurrencyModel.scan().exec();
 
@@ -88,6 +97,8 @@ export class RecurrencyService {
       }
     }
   }
+
+  public getNext;
 
   private checkWeeklyRule(r: Recurrency) {
     if (r.base_date.getUTCDay() === new Date().getUTCDay()) {

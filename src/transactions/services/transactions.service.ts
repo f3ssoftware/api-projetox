@@ -18,6 +18,7 @@ import { SortOrder } from 'dynamoose/dist/General';
 import { Installment } from '../entities/installment.interface';
 import { InstallmentDto } from '../dtos/installment.dto';
 import { InterWalletDto } from '../dtos/inter-wallet.dto';
+import { RecurrencyService } from './recurrency.service';
 
 @Injectable()
 export class TransactionsService {
@@ -60,10 +61,6 @@ export class TransactionsService {
     if (filter.reference) {
       result.where('reference').contains(filter.reference.toUpperCase());
     }
-
-    // if (filter.sortBy && filter.sortOrder) {
-    //   result.sort();
-    // }
 
     return this.sortBy(filter.sortBy, filter.sortOrder, await result.exec());
   }

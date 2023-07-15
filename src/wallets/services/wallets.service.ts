@@ -47,7 +47,7 @@ export class WalletsService {
       active: true,
       createdAt: w.createdAt ? new Date(w.createdAt) : new Date(),
       currency: w.currency,
-      name: w.name,
+      name: w.name.toUpperCase(),
       user_id: userId,
     });
   }

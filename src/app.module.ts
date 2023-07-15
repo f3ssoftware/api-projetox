@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { WalletsModule } from './wallets/wallets.module';
 import { RecurrencyController } from './transactions/controllers/recurrency.controller';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { RecurrencyController } from './transactions/controllers/recurrency.cont
       logger: false,
     }),
     WalletsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
