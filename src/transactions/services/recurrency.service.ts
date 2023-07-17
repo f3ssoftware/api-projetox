@@ -29,7 +29,7 @@ export class RecurrencyService {
       base_date: new Date(r.base_date),
       frequency: r.frequency,
       observation: r.observation,
-      reference: r.reference,
+      reference: r.reference.toUpperCase(),
       includeWeekends: r.includeWeekends,
       type: r.type,
     });

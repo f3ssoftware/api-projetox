@@ -8,9 +8,10 @@ import { WalletsModule } from '../wallets/wallets.module';
 import { RecurrencySchema } from './schemas/recurrency.schema';
 import { RecurrencyService } from './services/recurrency.service';
 import { RecurrencyController } from './controllers/recurrency.controller';
+import { ChartsController } from './controllers/charts.controller';
 
 @Module({
-  controllers: [TransactionsController, RecurrencyController],
+  controllers: [TransactionsController, RecurrencyController, ChartsController],
   providers: [TransactionsService, RecurrencyService],
   imports: [
     DynamooseModule.forFeature([

@@ -231,7 +231,35 @@ export class TransactionsService {
     };
   }
 
+  async getCashFlowByWallet(userId: string, wallet_id: string) {
+    if (!(await this.checkWalletOwner(userId, wallet_id))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
+
+    const transactions = await this.transactionModel
+      .scan('wallet_id')
+      .eq(wallet_id)
+      .exec();
+
+    return transactions
+      .sort((a, b) => {
+        if (new Date(a.due_date).getTime() < new Date(b.due_date).getTime()) {
+          return -1;
+        }
+        if (new Date(a.due_date).getTime() > new Date(b.due_date).getTime()) {
+          return 1;
+        }
+        return 0;
+      })
+      .map((t) => {
+        return [t.due_date, t.amount];
+      });
+  }
+
   private async checkWalletOwner(userId: string, walletId: string) {
+    console.log(walletId);
     const wallet = await this.walletService.getById(walletId);
     return wallet.user_id === userId;
   }
