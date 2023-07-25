@@ -42,6 +42,18 @@ export const TransactionSchema = new Schema({
     type: String,
     required: true,
   },
+  fee_amount: {
+    type: Number,
+    required: false,
+  },
+  fine_amount: {
+    type: Number,
+    required: false,
+  },
+  payment_date: {
+    type: Date,
+    required: false,
+  },
   parent_transaction_id: {
     type: String,
   },

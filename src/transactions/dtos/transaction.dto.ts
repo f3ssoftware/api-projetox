@@ -55,6 +55,21 @@ export class TransactionDTO {
   @IsOptional()
   observation: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  fine_amount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  fee_amount?: number;
+
+  @ApiPropertyOptional()
+  @IsDateString()
+  @IsOptional()
+  payment_date?: Date;
+
   @ApiProperty()
   @IsUUID()
   @IsNotEmpty({ message: 'Field "wallet_id" is required' })

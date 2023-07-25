@@ -3,10 +3,12 @@ import {
   IsDateString,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { SortOrder } from 'dynamoose/dist/General';
+import { TransactionCategoryEnum } from './transaction-category.dto';
 
 export class TransactionFilterDto {
   //   @ApiProperty()
@@ -51,4 +53,11 @@ export class TransactionFilterDto {
   @IsEnum(SortOrder)
   @IsOptional()
   public sortOrder: SortOrder;
+
+  public paid: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEnum(TransactionCategoryEnum)
+  public category: TransactionCategoryEnum;
 }

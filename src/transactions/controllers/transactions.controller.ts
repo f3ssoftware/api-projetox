@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { TransactionsService } from '../services/transactions.service';
 import { Transaction } from '../entities/transaction.interface';
 import {
@@ -14,6 +14,7 @@ import { RolesEnum } from '../../shared/enums/roles.enum';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { TransactionFilterDto } from '../dtos/transaction-filter.dto';
 import { InterWalletDto } from '../dtos/inter-wallet.dto';
+import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 
 @Controller({ version: ['1'], path: 'transactions' })
 @ApiTags('Transactions')
@@ -35,6 +36,17 @@ export class TransactionsController {
   @ApiBearerAuth()
   public create(@GetUser() userId, @Body() t: TransactionDTO) {
     return this.transactionsService.create(userId, t);
+  }
+
+  @Put('/pay/:transaction_id')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'transaction_id', required: true, type: 'string' })
+  public updateTransaction(
+    @GetUser() userId,
+    @Param('transaction_id') transactionId,
+    @Body() t: PayTransactionDto,
+  ) {
+    return this.transactionsService.pay(userId, transactionId, t);
   }
 
   @Post('inter-wallet')

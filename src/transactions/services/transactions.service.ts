@@ -19,6 +19,8 @@ import { Installment } from '../entities/installment.interface';
 import { InstallmentDto } from '../dtos/installment.dto';
 import { InterWalletDto } from '../dtos/inter-wallet.dto';
 import { RecurrencyService } from './recurrency.service';
+import { TransactionCategoryEnum } from '../dtos/transaction-category.dto';
+import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -43,6 +45,40 @@ export class TransactionsService {
     let result = this.transactionModel.scan('wallet_id').eq(wallet_id);
     // let result = this.transactionModel.query('wallet_id').eq(wallet_id);
 
+    switch (filter.category) {
+      case TransactionCategoryEnum.DUE_DATED:
+        {
+          result = result
+            .where('due_date')
+            .le(new Date().getTime())
+            .and()
+            .where('paid')
+            .eq(false);
+        }
+        break;
+      case TransactionCategoryEnum.PAYABLE:
+        {
+          result = result
+            .where('type')
+            .eq(TransactionType.PAYMENT)
+            .and()
+            .where('paid')
+            .and()
+            .where('due_date')
+            .gt(new Date().getTime())
+            .eq(false);
+        }
+        break;
+      case TransactionCategoryEnum.RECEIVABLE: {
+        result = result
+          .where('type')
+          .eq(TransactionType.BILLING)
+          .and()
+          .where('paid')
+          .eq(false);
+      }
+    }
+
     if (filter.startDate && filter.endDate) {
       result = result
         .where('due_date')
@@ -65,6 +101,41 @@ export class TransactionsService {
     return this.sortBy(filter.sortBy, filter.sortOrder, await result.exec());
   }
 
+  async pay(userId: string, transactionId: string, t: PayTransactionDto) {
+    const transaction = await this.transactionModel.get({ id: transactionId });
+
+    if (transaction.paid) {
+      throw new ConflictException('Transação já paga');
+    }
+
+    if (!(await this.checkWalletOwner(userId, transaction.wallet_id))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
+
+    console.log('DUE DATE: ', transaction.due_date);
+    return await this.transactionModel.update(
+      {
+        id: transaction.id,
+      },
+      {
+        amount: transaction.amount,
+        created_at: new Date(transaction.created_at),
+        due_date: new Date(transaction.due_date),
+        observation: transaction.observation,
+        installments: transaction.installments,
+        parent_transaction_id: transaction.parent_transaction_id,
+        reference: transaction.reference,
+        type: transaction.type,
+        wallet_id: transaction.wallet_id,
+        fee_amount: t.fee_amount,
+        fine_amount: t.fine_amount,
+        paid: true,
+        payment_date: new Date(t.payment_date),
+      },
+    );
+  }
   async create(userId: string, t: TransactionDTO) {
     if (!(await this.checkWalletOwner(userId, t.wallet_id))) {
       throw new UnauthorizedException(
@@ -191,6 +262,8 @@ export class TransactionsService {
     let incomeTransactionsAmount = 0;
     let outcomeTransactionsQuantity = 0;
     let outcomeTransactionsAmount = 0;
+    const walletTransactionsVolume = transactions.length;
+
     for (const t of transactions) {
       if (t.paid) {
         sum += t.amount;
@@ -228,6 +301,7 @@ export class TransactionsService {
       walletIncomeBillingAmount: incomeTransactionsAmount,
       walletOutcomeBillingQuantity: outcomeTransactionsQuantity,
       walletOutcomeBillingAmount: outcomeTransactionsAmount,
+      walletTransactionsVolume,
     };
   }
 

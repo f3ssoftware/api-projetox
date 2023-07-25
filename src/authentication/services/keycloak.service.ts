@@ -46,7 +46,7 @@ export class KeycloakService {
     const params = new URLSearchParams();
 
     params.append('grant_type', 'refresh_token');
-    params.append('client_id', 'pagstar');
+    params.append('client_id', 'pjx');
     params.append('refresh_token', refreshToken);
 
     try {
