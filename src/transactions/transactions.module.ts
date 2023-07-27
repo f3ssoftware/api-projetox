@@ -9,10 +9,18 @@ import { RecurrencySchema } from './schemas/recurrency.schema';
 import { RecurrencyService } from './services/recurrency.service';
 import { RecurrencyController } from './controllers/recurrency.controller';
 import { ChartsController } from './controllers/charts.controller';
+import { GroupsService } from './services/groups.service';
+import { GroupsController } from './controllers/groups.controller';
+import { GroupSchema } from './schemas/group.schema';
 
 @Module({
-  controllers: [TransactionsController, RecurrencyController, ChartsController],
-  providers: [TransactionsService, RecurrencyService],
+  controllers: [
+    TransactionsController,
+    RecurrencyController,
+    ChartsController,
+    GroupsController,
+  ],
+  providers: [TransactionsService, RecurrencyService, GroupsService],
   imports: [
     DynamooseModule.forFeature([
       {
@@ -22,6 +30,10 @@ import { ChartsController } from './controllers/charts.controller';
       {
         name: 'Recurrency',
         schema: RecurrencySchema,
+      },
+      {
+        name: 'Group',
+        schema: GroupSchema,
       },
     ]),
     forwardRef(() => WalletsModule),
