@@ -4,6 +4,7 @@ import { Group } from '../entities/group.interface';
 import { GroupKey } from 'aws-sdk/clients/inspector2';
 import { GroupDto } from '../dtos/group.dto';
 import { randomUUID } from 'crypto';
+import { EditGroupDto } from '../dtos/edit-group.dto';
 
 @Injectable()
 export class GroupsService {
@@ -24,6 +25,15 @@ export class GroupsService {
       label: g.label,
       name: g.name,
       wallet_id: walletId,
+    });
+  }
+
+  public async update(g: EditGroupDto) {
+    return await this.groupModel.update({
+      id: g.id,
+      name: g.name,
+      color: g.color,
+      label: g.label,
     });
   }
 }

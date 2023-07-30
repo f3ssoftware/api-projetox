@@ -21,6 +21,7 @@ import { InterWalletDto } from '../dtos/inter-wallet.dto';
 import { RecurrencyService } from './recurrency.service';
 import { TransactionCategoryEnum } from '../dtos/transaction-category.dto';
 import { PayTransactionDto } from '../dtos/pay-transaction.dto';
+import { CurrencyEnum } from '../../shared/enums/currency.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -305,17 +306,40 @@ export class TransactionsService {
     };
   }
 
-  async getCashFlowByWallet(userId: string, wallet_id: string) {
-    if (!(await this.checkWalletOwner(userId, wallet_id))) {
-      throw new UnauthorizedException(
-        'Usuário não possui acesso aos dados dessa carteira',
+  async getCashFlowByFilter(
+    userId: string,
+    filter: { walletId: string; currency: CurrencyEnum },
+  ) {
+    const wallets = await this.walletService.listAllByUser(userId);
+    // if (!(await this.checkWalletOwner(userId, wallet_id))) {
+    //   throw new UnauthorizedException(
+    //     'Usuário não possui acesso aos dados dessa carteira',
+    //   );
+    // }
+
+    let transactions = [];
+
+    if (filter.walletId === filter.walletId) {
+      transactions = transactions.concat(
+        await this.transactionModel
+          .scan('wallet_id')
+          .eq(filter.walletId)
+          .exec(),
       );
     }
 
-    const transactions = await this.transactionModel
-      .scan('wallet_id')
-      .eq(wallet_id)
-      .exec();
+    if (filter.currency && !filter.walletId) {
+      for (const wallet of wallets) {
+        if (wallet.currency === filter.currency) {
+          transactions = transactions.concat(
+            await this.transactionModel
+              .scan('wallet_id')
+              .eq(filter.walletId)
+              .exec(),
+          );
+        }
+      }
+    }
 
     return transactions
       .sort((a, b) => {
