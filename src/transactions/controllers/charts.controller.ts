@@ -12,7 +12,7 @@ export class ChartsController {
   @ApiBearerAuth()
   @ApiQuery({ name: 'wallet_id', type: 'string', required: false })
   @ApiQuery({ name: 'currency', type: 'string', required: false })
-  public async getCashflowChartByWallet(
+  public async getCashflowChartByFilter(
     @GetUser() userId: string,
     @Query('wallet_id') walletId: string,
     @Query('currency') currency: CurrencyEnum,
@@ -20,6 +20,21 @@ export class ChartsController {
     return this.transactionService.getCashFlowByFilter(userId, {
       walletId,
       currency,
+    });
+  }
+
+  @Get('profit')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'currency', type: 'string', required: false })
+  @ApiQuery({ name: 'year', type: 'number', required: false })
+  public async getProfitChartByFilter(
+    @GetUser() userId: string,
+    @Query('currency') currency: CurrencyEnum,
+    @Query('year') year: number,
+  ) {
+    return this.transactionService.getProfitChartByFilter(userId, {
+      currency,
+      year,
     });
   }
 }

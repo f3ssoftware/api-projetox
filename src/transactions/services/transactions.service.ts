@@ -22,6 +22,7 @@ import { RecurrencyService } from './recurrency.service';
 import { TransactionCategoryEnum } from '../dtos/transaction-category.dto';
 import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
+import { transaction } from 'dynamoose';
 
 @Injectable()
 export class TransactionsService {
@@ -354,6 +355,142 @@ export class TransactionsService {
       .map((t) => {
         return [t.due_date, t.amount];
       });
+  }
+
+  public async getProfitChartByFilter(
+    userId: string,
+    filter: { currency: CurrencyEnum; year: number },
+  ) {
+    const wallets = await this.walletService.listAllByUser(userId);
+    const chart: any = {};
+    // let transactions = [];
+    for (const wallet of wallets) {
+      if (wallet.currency === filter.currency) {
+        const transactions = await this.transactionModel
+          .scan('wallet_id')
+          .where(wallet.id)
+          .and()
+          .where('due_date')
+          .ge(new Date(filter.year, 1, 1).getTime())
+          .and()
+          .where('due_date')
+          .le(new Date(filter.year + 1, 12, 31).getTime())
+          .exec();
+        chart[wallet.name] = {
+          1: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 1 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          2: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 2 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          3: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 3 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          4: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 4 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          5: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 5 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          6: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 6 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          7: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 7 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          8: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 8 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          9: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 9 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          10: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 10 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          11: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 11 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+          12: this.computeProfit(
+            transactions.filter((t) => {
+              return (
+                t.due_date.getMonth() === 12 &&
+                t.due_date.getFullYear() === filter.year
+              );
+            }),
+          ),
+        };
+      }
+    }
+
+    return chart;
+  }
+
+  private computeProfit(transactions: Transaction[]) {
+    let profit = 0;
+
+    console.log(transactions);
+    for (const transaction of transactions) {
+      profit = Number(profit) + Number(transaction.amount);
+      // Number(transaction.fee_amount) +
+      // Number(transaction.fine_amount);
+    }
+
+    return profit;
   }
 
   private async checkWalletOwner(userId: string, walletId: string) {

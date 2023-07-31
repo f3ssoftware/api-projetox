@@ -22,8 +22,7 @@ export class WalletsService {
       .where('active')
       .eq(true);
 
-    console.log('FILTER NAME:', filter.name);
-    if (filter.name) {
+    if (filter?.name) {
       result.where('name').contains(filter.name.toUpperCase());
     }
 
