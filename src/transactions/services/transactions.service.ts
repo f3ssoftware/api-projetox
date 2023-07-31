@@ -353,7 +353,7 @@ export class TransactionsService {
         return 0;
       })
       .map((t) => {
-        return [t.due_date, t.amount];
+        return { x: t.due_date, y: t.amount };
       });
   }
 
