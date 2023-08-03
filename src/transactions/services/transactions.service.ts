@@ -67,8 +67,7 @@ export class TransactionsService {
             .where('paid')
             .and()
             .where('due_date')
-            .gt(new Date().getTime())
-            .eq(false);
+            .ge(new Date().getTime());
         }
         break;
       case TransactionCategoryEnum.RECEIVABLE: {
