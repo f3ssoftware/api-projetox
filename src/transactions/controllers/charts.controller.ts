@@ -37,4 +37,32 @@ export class ChartsController {
       year,
     });
   }
+
+  @Get('currency-stats')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'currency', type: 'string', required: true })
+  @ApiQuery({ name: 'year', type: 'string', required: true })
+  public async getStatsByCurrency(
+    @GetUser() userId: string,
+    @Query('currency') currency: CurrencyEnum,
+    @Query('year') year: number,
+  ) {
+    return this.transactionService.getCurrencyStats(year, currency);
+  }
+
+  @Get('cash-in')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'currency', type: 'string', required: true })
+  @ApiQuery({ name: 'year', type: 'string', required: true })
+  public async getCashInGroups(
+    @GetUser() userId: string,
+    @Query('currency') currency: CurrencyEnum,
+    @Query('year') year: number,
+  ) {
+    return this.transactionService.getCashinGroupedChart(
+      userId,
+      year,
+      currency,
+    );
+  }
 }

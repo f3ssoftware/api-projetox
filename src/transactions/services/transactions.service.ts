@@ -23,6 +23,7 @@ import { TransactionCategoryEnum } from '../dtos/transaction-category.dto';
 import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
 import { transaction } from 'dynamoose';
+import { CurrencyStatsDto } from '../dtos/currency-stats.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -354,6 +355,25 @@ export class TransactionsService {
       .map((t) => {
         return { x: t.due_date, y: t.amount };
       });
+  }
+
+  public async getCurrencyStats(year: number, currency: CurrencyEnum) {
+    const r: CurrencyStatsDto = {
+      cashinAmount: 338238,
+      cashoutAmount: 323938,
+      futureCashin: 3248294,
+      futureCashout: 23839,
+    };
+
+    return r;
+  }
+
+  public async getCashinGroupedChart(
+    userId: string,
+    year: number,
+    currency: CurrencyEnum,
+  ) {
+    const result = this.transactionModel.scan().exec();
   }
 
   public async getProfitChartByFilter(
