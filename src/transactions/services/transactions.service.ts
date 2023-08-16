@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -24,6 +25,7 @@ import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
 import { transaction } from 'dynamoose';
 import { CurrencyStatsDto } from '../dtos/currency-stats.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class TransactionsService {
@@ -138,6 +140,7 @@ export class TransactionsService {
       },
     );
   }
+
   async create(userId: string, t: TransactionDTO) {
     if (!(await this.checkWalletOwner(userId, t.wallet_id))) {
       throw new UnauthorizedException(
@@ -249,6 +252,18 @@ export class TransactionsService {
     return { t1, t2 };
   }
 
+  async delete(userId: string, transactionId: string) {
+    const transaction = await this.transactionModel.get({ id: transactionId });
+
+    if (!(await this.checkWalletOwner(userId, transaction.wallet_id))) {
+      throw new UnauthorizedException(
+        'Usuário não possui acesso aos dados dessa carteira',
+      );
+    }
+
+    return await this.transactionModel.delete({ id: transactionId });
+  }
+
   async stats(walletId: string) {
     const transactions = await this.transactionModel
       .scan({
@@ -311,6 +326,12 @@ export class TransactionsService {
     userId: string,
     filter: { walletId: string; currency: CurrencyEnum },
   ) {
+    if (filter.currency && filter.walletId) {
+      throw new BadRequestException(
+        'Parameters "currency" and "wallet_id" are coexisting ',
+      );
+    }
+
     const wallets = await this.walletService.listAllByUser(userId);
     // if (!(await this.checkWalletOwner(userId, wallet_id))) {
     //   throw new UnauthorizedException(
@@ -320,7 +341,7 @@ export class TransactionsService {
 
     let transactions = [];
 
-    if (filter.walletId === filter.walletId) {
+    if (filter.walletId) {
       transactions = transactions.concat(
         await this.transactionModel
           .scan('wallet_id')
@@ -333,17 +354,23 @@ export class TransactionsService {
       for (const wallet of wallets) {
         if (wallet.currency === filter.currency) {
           transactions = transactions.concat(
-            await this.transactionModel
-              .scan('wallet_id')
-              .eq(filter.walletId)
-              .exec(),
+            await this.transactionModel.scan('wallet_id').eq(wallet.id).exec(),
           );
         }
       }
     }
 
-    return transactions
-      .sort((a, b) => {
+    if (!filter.currency && filter.walletId) {
+      transactions = transactions.concat(
+        await this.transactionModel
+          .scan('wallet_id')
+          .eq(filter.walletId)
+          .exec(),
+      );
+    }
+
+    return this.mapTransactionsByDailySum(
+      transactions.sort((a, b) => {
         if (new Date(a.due_date).getTime() < new Date(b.due_date).getTime()) {
           return -1;
         }
@@ -351,10 +378,8 @@ export class TransactionsService {
           return 1;
         }
         return 0;
-      })
-      .map((t) => {
-        return { x: t.due_date, y: t.amount };
-      });
+      }),
+    );
   }
 
   public async getCurrencyStats(year: number, currency: CurrencyEnum) {
@@ -386,8 +411,9 @@ export class TransactionsService {
     for (const wallet of wallets) {
       if (wallet.currency === filter.currency) {
         const transactions = await this.transactionModel
-          .scan('wallet_id')
-          .where(wallet.id)
+          .scan()
+          .where('wallet_id')
+          .eq(wallet.id)
           .and()
           .where('due_date')
           .ge(new Date(filter.year, 1, 1).getTime())
@@ -395,6 +421,7 @@ export class TransactionsService {
           .where('due_date')
           .le(new Date(filter.year + 1, 12, 31).getTime())
           .exec();
+
         chart[wallet.name] = {
           1: this.computeProfit(
             transactions.filter((t) => {
@@ -502,7 +529,6 @@ export class TransactionsService {
   private computeProfit(transactions: Transaction[]) {
     let profit = 0;
 
-    console.log(transactions);
     for (const transaction of transactions) {
       profit = Number(profit) + Number(transaction.amount);
       // Number(transaction.fee_amount) +
@@ -590,5 +616,30 @@ export class TransactionsService {
     }
 
     return installments;
+  }
+
+  private mapTransactionsByDailySum(transactions: Transaction[]) {
+    const mapped = [];
+
+    transactions.forEach((t) => {
+      const foundIndex = this.checkMappedDateIsPresent(
+        format(new Date(t.due_date), 'yyyy-MM-dd'),
+        mapped,
+      );
+      if (foundIndex !== -1) {
+        mapped[foundIndex].sum = mapped[foundIndex].sum + t.amount;
+      } else {
+        mapped.push({
+          date: format(new Date(t.due_date), 'yyyy-MM-dd'),
+          sum: t.amount,
+        });
+      }
+    });
+
+    return mapped;
+  }
+
+  private checkMappedDateIsPresent(date: string, mappedArr: any[]) {
+    return mappedArr.findIndex((mapped: any) => mapped.date === date);
   }
 }

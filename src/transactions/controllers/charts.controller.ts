@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { TransactionsService } from '../services/transactions.service';
@@ -12,21 +12,28 @@ export class ChartsController {
   @ApiBearerAuth()
   @ApiQuery({ name: 'wallet_id', type: 'string', required: false })
   @ApiQuery({ name: 'currency', type: 'string', required: false })
+  @ApiQuery({ name: 'days_gone', type: 'number', required: true })
   public async getCashflowChartByFilter(
     @GetUser() userId: string,
     @Query('wallet_id') walletId: string,
     @Query('currency') currency: CurrencyEnum,
   ) {
-    return this.transactionService.getCashFlowByFilter(userId, {
-      walletId,
-      currency,
-    });
+    if (currency || walletId) {
+      return this.transactionService.getCashFlowByFilter(userId, {
+        walletId,
+        currency,
+      });
+    }
+
+    throw new BadRequestException(
+      'Parameters "wallet_id" or "currency" should be passed',
+    );
   }
 
   @Get('profit')
   @ApiBearerAuth()
-  @ApiQuery({ name: 'currency', type: 'string', required: false })
-  @ApiQuery({ name: 'year', type: 'number', required: false })
+  @ApiQuery({ name: 'currency', type: 'string', required: true })
+  @ApiQuery({ name: 'year', type: 'number', required: true })
   public async getProfitChartByFilter(
     @GetUser() userId: string,
     @Query('currency') currency: CurrencyEnum,

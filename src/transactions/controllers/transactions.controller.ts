@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { TransactionsService } from '../services/transactions.service';
 import { Transaction } from '../entities/transaction.interface';
 import {
@@ -47,6 +56,16 @@ export class TransactionsController {
     @Body() t: PayTransactionDto,
   ) {
     return this.transactionsService.pay(userId, transactionId, t);
+  }
+
+  @Delete('/:transaction_id')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'transaction_id', required: true, type: 'string' })
+  public deleteTransaction(
+    @GetUser() userId,
+    @Param('transaction_id') transactionId,
+  ) {
+    return this.transactionsService.delete(userId, transactionId);
   }
 
   @Post('inter-wallet')
