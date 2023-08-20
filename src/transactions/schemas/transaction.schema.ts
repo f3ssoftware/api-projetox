@@ -63,4 +63,11 @@ export const TransactionSchema = new Schema({
       name: 'wallet-id-index',
     },
   },
+  group_id: {
+    type: String,
+    index: {
+      name: 'group-id-index',
+    },
+    required: false,
+  },
 });

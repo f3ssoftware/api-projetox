@@ -74,4 +74,9 @@ export class TransactionDTO {
   @IsUUID()
   @IsNotEmpty({ message: 'Field "wallet_id" is required' })
   wallet_id: string;
+
+  @ApiProperty()
+  @IsUUID()
+  @IsOptional()
+  group_id?: string;
 }

@@ -25,7 +25,8 @@ import { PayTransactionDto } from '../dtos/pay-transaction.dto';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
 import { transaction } from 'dynamoose';
 import { CurrencyStatsDto } from '../dtos/currency-stats.dto';
-import { format } from 'date-fns';
+import { format, sub } from 'date-fns';
+import { GroupsService } from './groups.service';
 
 @Injectable()
 export class TransactionsService {
@@ -34,6 +35,7 @@ export class TransactionsService {
     private transactionModel: Model<Transaction, TransactionKey>,
     @Inject(forwardRef(() => WalletsService))
     private readonly walletService: WalletsService,
+    private readonly groupService: GroupsService,
   ) {}
 
   async listBy(
@@ -169,6 +171,15 @@ export class TransactionsService {
       }
     }
 
+    if (t.group_id) {
+      const group = await this.groupService.get(t.group_id);
+      if (!this.checkWalletOwner(userId, group.wallet_id)) {
+        throw new UnauthorizedException(
+          'Grupo não corresponde a carteira desse usuário',
+        );
+      }
+    }
+
     const savedTransaction = await this.transactionModel.create({
       id: randomUUID(),
       amount:
@@ -193,6 +204,7 @@ export class TransactionsService {
               },
             ],
       wallet_id: t.wallet_id,
+      group_id: t.group_id,
     });
 
     this.generateAffiliatedTransactions(savedTransaction);
@@ -324,7 +336,7 @@ export class TransactionsService {
 
   async getCashFlowByFilter(
     userId: string,
-    filter: { walletId: string; currency: CurrencyEnum },
+    filter: { walletId: string; currency: CurrencyEnum; daysGone: number },
   ) {
     if (filter.currency && filter.walletId) {
       throw new BadRequestException(
@@ -333,19 +345,22 @@ export class TransactionsService {
     }
 
     const wallets = await this.walletService.listAllByUser(userId);
-    // if (!(await this.checkWalletOwner(userId, wallet_id))) {
-    //   throw new UnauthorizedException(
-    //     'Usuário não possui acesso aos dados dessa carteira',
-    //   );
-    // }
 
     let transactions = [];
 
     if (filter.walletId) {
       transactions = transactions.concat(
         await this.transactionModel
-          .scan('wallet_id')
+          .scan()
+          .where('wallet_id')
           .eq(filter.walletId)
+          .and()
+          .where('due_date')
+          .ge(
+            sub(new Date(), {
+              days: filter.daysGone,
+            }).getTime(),
+          )
           .exec(),
       );
     }
@@ -379,7 +394,9 @@ export class TransactionsService {
         }
         return 0;
       }),
-    );
+    ).map((group) => {
+      return { x: group.date, y: group.sum };
+    });
   }
 
   public async getCurrencyStats(year: number, currency: CurrencyEnum) {
@@ -393,12 +410,45 @@ export class TransactionsService {
     return r;
   }
 
-  public async getCashinGroupedChart(
+  public async getGroupedChart(
     userId: string,
-    year: number,
+    daysGone: number,
     currency: CurrencyEnum,
+    type: TransactionType,
   ) {
-    const result = this.transactionModel.scan().exec();
+    let transactions = [];
+    const wallets = await this.walletService.listAllByUser(userId);
+
+    for (const w of wallets) {
+      if (w.currency === currency) {
+        const result = await this.transactionModel
+          .scan()
+          .where('type')
+          .eq(type)
+          .and()
+          .where('wallet_id')
+          .eq(w.id)
+          .and()
+          .where('due_date')
+          .ge(
+            sub(new Date(), {
+              days: daysGone,
+            }).getTime(),
+          )
+          .exec();
+        transactions = transactions.concat(result);
+      }
+    }
+
+    const grouped = await this.groupTransactions(transactions);
+
+    return grouped.map((g) => {
+      return {
+        name: g.name,
+        color: g.color,
+        transactions: g.transactions.length,
+      };
+    });
   }
 
   public async getProfitChartByFilter(
@@ -641,5 +691,47 @@ export class TransactionsService {
 
   private checkMappedDateIsPresent(date: string, mappedArr: any[]) {
     return mappedArr.findIndex((mapped: any) => mapped.date === date);
+  }
+
+  private async groupTransactions(
+    transactions: Transaction[],
+  ): Promise<{ name: string; transactions: Transaction[]; color: string }[]> {
+    const r: any = [];
+
+    for (const t of transactions) {
+      if (t.group_id) {
+        const group = await this.groupService.get(t.group_id);
+        const indexFound = r.findIndex((item: any) => item.name === group.name);
+        if (indexFound !== -1) {
+          r[indexFound] = {
+            name: group.name,
+            transactions: r[indexFound].transactions.concat([t]),
+            color: group.color,
+          };
+        } else {
+          r.push({
+            name: group.name,
+            color: group.color,
+            transactions: [t],
+          });
+        }
+      } else {
+        const indexFound = r.findIndex(
+          (item: any) => item.name === 'SEM GRUPO',
+        );
+
+        if (indexFound !== -1) {
+          r[indexFound].transactions = r[indexFound].transactions.concat([t]);
+        } else {
+          r.push({
+            name: 'SEM GRUPO',
+            color: '#C2C2C2',
+            transactions: [t],
+          });
+        }
+      }
+    }
+
+    return r;
   }
 }

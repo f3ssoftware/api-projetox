@@ -36,4 +36,8 @@ export class GroupsService {
       label: g.label,
     });
   }
+
+  public async get(group_id: string) {
+    return await this.groupModel.get(group_id);
+  }
 }

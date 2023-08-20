@@ -20,6 +20,7 @@ export interface Transaction extends TransactionKey {
   fine_amount?: number;
   fee_amount?: number;
   payment_date?: Date;
+  group_id?: string;
 }
 
 //     createdAt: new Date(),

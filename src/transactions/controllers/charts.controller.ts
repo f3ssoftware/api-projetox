@@ -3,6 +3,7 @@ import { GetUser } from '../../shared/decorators/get-user.decorator';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { TransactionsService } from '../services/transactions.service';
 import { CurrencyEnum } from '../../shared/enums/currency.enum';
+import { TransactionType } from '../enums/transaction-types.enum';
 
 @Controller({ version: ['1'], path: 'charts' })
 @ApiTags('Charts')
@@ -17,11 +18,13 @@ export class ChartsController {
     @GetUser() userId: string,
     @Query('wallet_id') walletId: string,
     @Query('currency') currency: CurrencyEnum,
+    @Query('days_gone') daysGone: number,
   ) {
     if (currency || walletId) {
       return this.transactionService.getCashFlowByFilter(userId, {
         walletId,
         currency,
+        daysGone,
       });
     }
 
@@ -60,16 +63,34 @@ export class ChartsController {
   @Get('cash-in')
   @ApiBearerAuth()
   @ApiQuery({ name: 'currency', type: 'string', required: true })
-  @ApiQuery({ name: 'year', type: 'string', required: true })
+  @ApiQuery({ name: 'days_gone', type: 'number', required: true })
   public async getCashInGroups(
     @GetUser() userId: string,
     @Query('currency') currency: CurrencyEnum,
-    @Query('year') year: number,
+    @Query('days_gone') daysGone: number,
   ) {
-    return this.transactionService.getCashinGroupedChart(
+    return this.transactionService.getGroupedChart(
       userId,
-      year,
+      daysGone,
       currency,
+      TransactionType.BILLING,
+    );
+  }
+
+  @Get('cash-out')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'currency', type: 'string', required: true })
+  @ApiQuery({ name: 'days_gone', type: 'number', required: true })
+  public async getCashOutGroups(
+    @GetUser() userId: string,
+    @Query('currency') currency: CurrencyEnum,
+    @Query('days_gone') daysGone: number,
+  ) {
+    return this.transactionService.getGroupedChart(
+      userId,
+      daysGone,
+      currency,
+      TransactionType.PAYMENT,
     );
   }
 }
