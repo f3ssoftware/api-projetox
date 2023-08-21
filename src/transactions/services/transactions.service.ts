@@ -681,7 +681,7 @@ export class TransactionsService {
       } else {
         mapped.push({
           date: format(new Date(t.due_date), 'yyyy-MM-dd'),
-          sum: t.amount,
+          sum: mapped[foundIndex].amount + t.amount,
         });
       }
     });
