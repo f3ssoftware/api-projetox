@@ -348,7 +348,7 @@ export class TransactionsService {
 
     let transactions = [];
 
-    if (filter.walletId) {
+    if (!filter.currency && filter.walletId) {
       transactions = transactions.concat(
         await this.transactionModel
           .scan()
@@ -375,27 +375,29 @@ export class TransactionsService {
       }
     }
 
-    if (!filter.currency && filter.walletId) {
-      transactions = transactions.concat(
-        await this.transactionModel
-          .scan('wallet_id')
-          .eq(filter.walletId)
-          .exec(),
-      );
-    }
+    // if (!filter.currency && filter.walletId) {
+    //   transactions = transactions.concat(
+    //     await this.transactionModel
+    //       .scan('wallet_id')
+    //       .eq(filter.walletId)
+    //       .exec(),
+    //   );
+    // }
 
-    return this.mapTransactionsByDailySum(
-      transactions.sort((a, b) => {
-        if (new Date(a.due_date).getTime() < new Date(b.due_date).getTime()) {
-          return -1;
-        }
-        if (new Date(a.due_date).getTime() > new Date(b.due_date).getTime()) {
-          return 1;
-        }
-        return 0;
-      }),
-    ).map((group) => {
-      return { x: group.date, y: group.sum };
+    const sortedTransactions = transactions.sort((a, b) => {
+      if (new Date(a.due_date).getTime() < new Date(b.due_date).getTime()) {
+        return -1;
+      }
+      if (new Date(a.due_date).getTime() > new Date(b.due_date).getTime()) {
+        return 1;
+      }
+      return 0;
+    });
+
+    let balance = 0;
+    return this.mapTransactionsByDailySum(sortedTransactions).map((group) => {
+      balance = balance + group.sum;
+      return { x: group.date, y: balance };
     });
   }
 
@@ -676,12 +678,18 @@ export class TransactionsService {
         format(new Date(t.due_date), 'yyyy-MM-dd'),
         mapped,
       );
-      if (foundIndex !== -1) {
-        mapped[foundIndex].sum = mapped[foundIndex].sum + t.amount;
+      if (foundIndex != -1) {
+        console.log(
+          'caindo no index ',
+          foundIndex,
+          ' soma = ',
+          mapped[foundIndex].sum,
+        );
+        mapped[foundIndex].sum = mapped[foundIndex].sum + t?.amount;
       } else {
         mapped.push({
           date: format(new Date(t.due_date), 'yyyy-MM-dd'),
-          sum: mapped[foundIndex].amount + t.amount,
+          sum: t?.amount,
         });
       }
     });
