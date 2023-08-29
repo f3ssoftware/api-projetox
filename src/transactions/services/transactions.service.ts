@@ -361,6 +361,9 @@ export class TransactionsService {
               days: filter.daysGone,
             }).getTime(),
           )
+          .and()
+          .where('paid')
+          .eq(true)
           .exec(),
       );
     }

@@ -51,13 +51,13 @@ export class ChartsController {
   @Get('currency-stats')
   @ApiBearerAuth()
   @ApiQuery({ name: 'currency', type: 'string', required: true })
-  @ApiQuery({ name: 'year', type: 'string', required: true })
+  @ApiQuery({ name: 'days_gone', type: 'string', required: true })
   public async getStatsByCurrency(
     @GetUser() userId: string,
     @Query('currency') currency: CurrencyEnum,
-    @Query('year') year: number,
+    @Query('days_gone') daysGone: number,
   ) {
-    return this.transactionService.getCurrencyStats(year, currency);
+    return this.transactionService.getCurrencyStats(daysGone, currency);
   }
 
   @Get('cash-in')
