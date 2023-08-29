@@ -481,7 +481,7 @@ export class TransactionsService {
           1: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 1 &&
+                t.due_date.getMonth() + 1 === 1 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -489,7 +489,7 @@ export class TransactionsService {
           2: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 2 &&
+                t.due_date.getMonth() + 1 === 2 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -497,7 +497,7 @@ export class TransactionsService {
           3: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 3 &&
+                t.due_date.getMonth() + 1 === 3 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -505,7 +505,7 @@ export class TransactionsService {
           4: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 4 &&
+                t.due_date.getMonth() + 1 === 4 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -513,7 +513,7 @@ export class TransactionsService {
           5: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 5 &&
+                t.due_date.getMonth() + 1 === 5 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -521,7 +521,7 @@ export class TransactionsService {
           6: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 6 &&
+                t.due_date.getMonth() + 1 === 6 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -529,7 +529,7 @@ export class TransactionsService {
           7: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 7 &&
+                t.due_date.getMonth() + 1 === 7 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -537,7 +537,7 @@ export class TransactionsService {
           8: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 8 &&
+                t.due_date.getMonth() + 1 === 8 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -545,7 +545,7 @@ export class TransactionsService {
           9: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 9 &&
+                t.due_date.getMonth() + 1 === 9 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -553,7 +553,7 @@ export class TransactionsService {
           10: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 10 &&
+                t.due_date.getMonth() + 1 === 10 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -561,7 +561,7 @@ export class TransactionsService {
           11: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 11 &&
+                t.due_date.getMonth() + 1 === 11 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
@@ -569,7 +569,7 @@ export class TransactionsService {
           12: this.computeProfit(
             transactions.filter((t) => {
               return (
-                t.due_date.getMonth() === 12 &&
+                t.due_date.getMonth() + 1 === 12 &&
                 t.due_date.getFullYear() === filter.year
               );
             }),
