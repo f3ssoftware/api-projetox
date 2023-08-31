@@ -57,7 +57,7 @@ export class ChartsController {
     @Query('currency') currency: CurrencyEnum,
     @Query('days_gone') daysGone: number,
   ) {
-    return this.transactionService.getCurrencyStats(daysGone, currency);
+    return this.transactionService.getCurrencyStats(userId, daysGone, currency);
   }
 
   @Get('cash-in')

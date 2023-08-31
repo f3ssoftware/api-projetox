@@ -27,6 +27,7 @@ import { transaction } from 'dynamoose';
 import { CurrencyStatsDto } from '../dtos/currency-stats.dto';
 import { format, sub } from 'date-fns';
 import { GroupsService } from './groups.service';
+import { Wallet } from '../../wallets/entities/wallet.interface';
 
 @Injectable()
 export class TransactionsService {
@@ -104,7 +105,11 @@ export class TransactionsService {
       result.where('reference').contains(filter.reference.toUpperCase());
     }
 
-    return this.sortBy(filter.sortBy, filter.sortOrder, await result.exec());
+    return this.sortBy(
+      filter.sortBy,
+      filter.sortOrder,
+      await this.getGroup(await result.exec()),
+    );
   }
 
   async pay(userId: string, transactionId: string, t: PayTransactionDto) {
@@ -404,12 +409,20 @@ export class TransactionsService {
     });
   }
 
-  public async getCurrencyStats(year: number, currency: CurrencyEnum) {
+  public async getCurrencyStats(
+    userId: string,
+    daysGone: number,
+    currency: CurrencyEnum,
+  ) {
+    const wallets = (await this.walletService.listAllByUser(userId)).filter(
+      (w) => w.currency === currency,
+    );
+
     const r: CurrencyStatsDto = {
-      cashinAmount: 338238,
-      cashoutAmount: 323938,
-      futureCashin: 3248294,
-      futureCashout: 23839,
+      cashinAmount: await this.getCashinAmount(wallets, daysGone),
+      cashoutAmount: await this.getCashoutAmount(wallets, daysGone),
+      futureCashin: await this.getFutureCashinAmount(wallets, daysGone),
+      futureCashout: await this.getFutureCashoutAmount(wallets, daysGone),
     };
 
     return r;
@@ -741,6 +754,135 @@ export class TransactionsService {
           });
         }
       }
+    }
+
+    return r;
+  }
+
+  private sumTransactions(transactions: Transaction[]) {
+    console.log('entreandoooo');
+    const initial = 0;
+    const sum = transactions.reduce(
+      (acc, currentTransaction) => acc + currentTransaction.amount,
+      initial,
+    );
+    console.log('SOMA = ', sum);
+    return sum;
+  }
+
+  private async getCashinAmount(wallets: Wallet[], daysGone: number) {
+    let cashInAmount = 0;
+    for (const wallet of wallets) {
+      const transactions = await this.transactionModel
+        .scan()
+        .where('wallet_id')
+        .eq(wallet.id)
+        .and()
+        .where('type')
+        .eq(TransactionType.BILLING)
+        .and()
+        .where('due_date')
+        .le(new Date().getTime())
+        .and()
+        .where('due_date')
+        .ge(
+          sub(new Date(), {
+            days: daysGone,
+          }).getTime(),
+        )
+        .exec();
+
+      cashInAmount = cashInAmount + this.sumTransactions(transactions);
+
+      return cashInAmount;
+    }
+  }
+
+  private async getFutureCashinAmount(wallets: Wallet[], daysGone: number) {
+    let cashInAmount = 0;
+    for (const wallet of wallets) {
+      const transactions = await this.transactionModel
+        .scan()
+        .where('wallet_id')
+        .eq(wallet.id)
+        .and()
+        .where('type')
+        .eq(TransactionType.BILLING)
+        // .where('due_date')
+        // .ge(new Date().getTime())
+        // .or()
+        .where('paid')
+        .eq(false)
+        .exec();
+
+      cashInAmount = cashInAmount + this.sumTransactions(transactions);
+
+      return cashInAmount;
+    }
+  }
+
+  private async getCashoutAmount(wallets: Wallet[], daysGone: number) {
+    let cashoutAmount = 0;
+    for (const wallet of wallets) {
+      const transactions = await this.transactionModel
+        .scan()
+        .where('wallet_id')
+        .eq(wallet.id)
+        .and()
+        .where('type')
+        .eq(TransactionType.PAYMENT)
+        .and()
+        .where('due_date')
+        .le(new Date().getTime())
+        .and()
+        .where('due_date')
+        .ge(
+          sub(new Date(), {
+            days: daysGone,
+          }).getTime(),
+        )
+        .exec();
+
+      cashoutAmount = cashoutAmount + this.sumTransactions(transactions);
+
+      return cashoutAmount;
+    }
+  }
+
+  private async getFutureCashoutAmount(wallets: Wallet[], daysGone: number) {
+    let cashoutAmount = 0;
+    for (const wallet of wallets) {
+      const transactions = await this.transactionModel
+        .scan()
+        .where('wallet_id')
+        .eq(wallet.id)
+        .and()
+        .where('type')
+        .eq(TransactionType.PAYMENT)
+        .and()
+        // .where('due_date')
+        // .ge(new Date().getTime())
+        // .or()
+        .where('paid')
+        .eq(false)
+        .exec();
+
+      cashoutAmount = cashoutAmount + this.sumTransactions(transactions);
+
+      return cashoutAmount;
+    }
+  }
+
+  private async getGroup(transactions: Transaction[]) {
+    const r: any = [];
+    for (const transaction of transactions) {
+      let group;
+
+      if (transaction.group_id) {
+        group = await this.groupService.get(transaction.group_id);
+      }
+
+      r.push({ ...transaction, group });
     }
 
     return r;
