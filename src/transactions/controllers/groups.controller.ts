@@ -25,12 +25,18 @@ export class GroupsController {
   @ApiParam({ name: 'wallet_id', required: true, type: 'string' })
   @Roles(RolesEnum.FREE, RolesEnum.PREMIUM, RolesEnum.ADMIN)
   public create(@Param('wallet_id') walletId: string, @Body() g: GroupDto) {
-    // return walletId;
     return this.groupService.create(walletId, g);
   }
 
   @Put('')
   public update(@Body() g: EditGroupDto) {
     return this.groupService.update(g);
+  }
+
+  @Get('detail/:group_id')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'group_id', required: true, type: 'string' })
+  public detail(@Param('group_id') group_id: string) {
+    return this.groupService.get(group_id);
   }
 }
