@@ -12,7 +12,6 @@ import { getCardIssuerName } from '../helpers/card-issuer-name.helper';
 export class CheckoutService {
   public async checkPayment(orderId: string) {
     try {
-      console.log(orderId);
       const req = await axios.get(
         `${process.env.PAGARME_API_URL}/core/v5/orders/${orderId}`,
         {

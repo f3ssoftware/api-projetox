@@ -10,6 +10,10 @@ export class StoreService {
   ) {}
 
   public async listProducts() {
-    return this.productsModel.scan().exec();
+    return await this.productsModel.scan().exec();
+  }
+
+  public async getProduct(productId: string) {
+    return await this.productsModel.get({ id: productId });
   }
 }
