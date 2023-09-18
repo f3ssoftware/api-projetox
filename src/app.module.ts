@@ -15,6 +15,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 import { WalletsModule } from './wallets/wallets.module';
 import { RecurrencyController } from './transactions/controllers/recurrency.controller';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     WalletsModule,
     ScheduleModule.forRoot(),
+    CheckoutModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -36,6 +36,7 @@
     "cron": "^2.4.0",
     "date-fns": "^2.30.0",
     "dynamoose": "^3.2.0",
+    "fs": "^0.0.1-security",
     "js-brasil": "^2.5.3",
     "jwt-decode": "^3.1.2",
     "nestjs-dynamoose": "^0.5.3",
