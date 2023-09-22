@@ -10,7 +10,11 @@
     "KEYCLOAK_ADMIN_PASSWORD": "#Yoeov8zi*.",
     "AWS_ACCESS_KEY_ID": "AKIA2IJJRK6VEH7NPOLC",
     "AWS_SECRET_ACCESS_KEY": "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",
-    "AWS_REGION": "us-west-1"
+    "AWS_REGION": "us-west-1",
+    "PAGARME_PUBLIC_KEY": "pk_test_r8l9G1mH55iaEpv6",
+    "PAGARME_SECRET_KEY": "sk_test_9BLvMWVHeUn5E4Dk",
+    "AWS_COGNITO_USER_POOL_ID": "us-west-1_LUkW6AImW",
+    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu"
   },
   "env_prod": {
     "NODE_ENV": "prod",
@@ -21,6 +25,8 @@
     "AWS_SECRET_ACCESS_KEY": "qQIFSc2CfcK8g82qNuO04/ASPtKh8mLfSVtgGiSO",
     "AWS_REGION": "us-west-1",
     "PAGARME_PUBLIC_KEY": "pk_test_r8l9G1mH55iaEpv6",
-    "PAGARME_SECRET_KEY": "sk_test_9BLvMWVHeUn5E4Dk"
+    "PAGARME_SECRET_KEY": "sk_test_9BLvMWVHeUn5E4Dk",
+    "AWS_COGNITO_USER_POOL_ID": "us-west-1_LUkW6AImW",
+    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu"
   }
 }
