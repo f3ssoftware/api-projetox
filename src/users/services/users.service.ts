@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { UserRegistrationDTO } from '../models/user-registration.dto';
 import { KeycloakAdminService } from '../../authentication/services/keycloak-admin.service';
 import { KeycloakUserRepresentationDTO } from '../../authentication/dtos/keycloak-user-representation';
+import { CognitoService } from '../../authentication/services/cognito.service';
+import { CognitoRegister } from '../../authentication/dtos/cognito-register.dto';
+import { CognitoUserVerificationDto } from '../../authentication/dtos/cognito-user-verficiation.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly keycloakAdminService: KeycloakAdminService) {}
+  constructor(
+    private readonly keycloakAdminService: KeycloakAdminService,
+    private readonly cognitoService: CognitoService,
+  ) {}
+
   async register(user: UserRegistrationDTO) {
     const kcUserRepresentation: KeycloakUserRepresentationDTO = {
       firstName: user.firstName,
@@ -27,5 +34,16 @@ export class UsersService {
 
     await this.keycloakAdminService.userRoleMapping(kcUserId, 'free');
     return { userId: kcUserId };
+  }
+
+  async registerCognito(cognitoRegister: CognitoRegister) {
+    return this.cognitoService.registerUser(cognitoRegister);
+  }
+
+  async verifyUserCognito(cognitoUserVerification: CognitoUserVerificationDto) {
+    return this.cognitoService.verifyUser(
+      cognitoUserVerification.email,
+      cognitoUserVerification.code,
+    );
   }
 }
