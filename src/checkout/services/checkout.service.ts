@@ -7,9 +7,12 @@ import { PagarmeOrderDto } from '../dtos/pagarme/pagarme-order.dto';
 import { check } from 'prettier';
 import { PagarmeCreditOperationTypes } from '../enums/pagarme-credit-operation-types.enum';
 import { getCardIssuerName } from '../helpers/card-issuer-name.helper';
+import { StoreService } from './store.service';
+import { Product } from '../entities/product.inteface';
 
 @Injectable()
 export class CheckoutService {
+  constructor(private storeService: StoreService) {}
   public async checkPayment(orderId: string) {
     try {
       const req = await axios.get(
@@ -36,6 +39,12 @@ export class CheckoutService {
   public async checkout(checkoutDto: CheckoutDto) {
     switch (checkoutDto.payment_method) {
       case PagarmePaymentMethods.PIX: {
+        const products = [];
+
+        for (const p of checkoutDto.products) {
+          products.push(await this.storeService.getProduct(p));
+        }
+
         const body: PagarmeOrderDto = {
           customer: {
             phones: {
@@ -62,28 +71,20 @@ export class CheckoutService {
           },
           anti_fraud_enabled: true,
           closed: false,
-          items: checkoutDto.products.map((product) => {
-            return {
-              amount: product.amount.toString(),
-              description: product.description,
-              id: product.id,
-              code: product.id,
-              quantity: '1',
-            };
-          }),
-          payments: checkoutDto.products.map((p) => {
-            return {
-              amount: p.amount,
-              payment_method: checkoutDto.payment_method,
-              pix: {
-                expires_in: 1000 * 60 * 15,
-              },
-            };
-          }),
+          items: await this.fetchItems(products),
+          payments: await this.fetchPayments(
+            products,
+            checkoutDto.payment_method,
+          ),
         };
         return await this.createOrder(body);
       }
       case PagarmePaymentMethods.CREDIT_CARD: {
+        const products = [];
+
+        for (const p of checkoutDto.products) {
+          products.push(await this.storeService.getProduct(p));
+        }
         const body: PagarmeOrderDto = {
           customer: {
             phones: {
@@ -110,7 +111,7 @@ export class CheckoutService {
           },
           anti_fraud_enabled: true,
           closed: false,
-          items: checkoutDto.products.map((product) => {
+          items: products.map((product) => {
             return {
               amount: product.amount.toString(),
               quantity: '1',
@@ -119,7 +120,7 @@ export class CheckoutService {
               code: product.id,
             };
           }),
-          payments: checkoutDto.products.map((p) => {
+          payments: products.map((p) => {
             return {
               amount: p.amount,
               payment_method: checkoutDto.payment_method,
@@ -155,6 +156,7 @@ export class CheckoutService {
   private async createOrder(body: PagarmeOrderDto) {
     try {
       // return body;
+      // console.log(body);
       const req = await axios.post(
         `${process.env.PAGARME_API_URL}/core/v5/orders`,
         body,
@@ -174,5 +176,32 @@ export class CheckoutService {
       console.error(err.response.data);
       throw new UnprocessableEntityException(err.response.data);
     }
+  }
+
+  private async fetchItems(products: Product[]) {
+    return products.map((product) => {
+      return {
+        amount: product.amount.toString(),
+        description: product.description,
+        id: product.id,
+        code: product.id,
+        quantity: '1',
+      };
+    });
+  }
+
+  private async fetchPayments(
+    products: Product[],
+    payment_method: PagarmePaymentMethods,
+  ) {
+    return products.map((product) => {
+      return {
+        amount: product.amount,
+        payment_method: payment_method,
+        pix: {
+          expires_in: 1000 * 60 * 15,
+        },
+      };
+    });
   }
 }

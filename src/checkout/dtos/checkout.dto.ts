@@ -19,6 +19,6 @@ export class CheckoutDto {
   card?: CardDto;
 
   @ApiProperty()
-  @IsArray()
-  products: Product[];
+  @IsArray({})
+  products: string[];
 }
