@@ -1,5 +1,5 @@
 export interface PagarmeItemDto {
-  amount?: string;
+  amount?: number;
   description?: string;
   quantity?: string;
   code: string;

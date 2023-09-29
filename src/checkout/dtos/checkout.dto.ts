@@ -1,9 +1,16 @@
-import { IsArray, IsEnum, IsObject } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
 import { PagarmePaymentMethods } from '../enums/pagarme-payment-methods.enum';
 import { CardDto } from './card.dto';
 import { CustomerDto } from './customer.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Product } from '../entities/product.inteface';
+import { Type } from 'class-transformer';
 
 export class CheckoutDto {
   @ApiProperty()
@@ -12,10 +19,15 @@ export class CheckoutDto {
 
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => CustomerDto)
   customer: CustomerDto;
 
   @ApiPropertyOptional()
-  // @IsObject({ message: 'Objeto card não informado' })
+  @IsObject()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CardDto)
   card?: CardDto;
 
   @ApiProperty()

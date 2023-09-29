@@ -54,12 +54,6 @@ export class CheckoutService {
                 number: checkoutDto.customer.phone_number.number,
               },
             },
-            // address: {
-            //   city: checkoutDto.customer.address.city,
-            //   country: checkoutDto.customer.address.country,
-            //   state: checkoutDto.customer.address.state,
-            //   zip_code: checkoutDto.customer.address.zipcode,
-            // },
             name: checkoutDto.customer.name,
             birthdate: checkoutDto.customer.birthDate,
             document: checkoutDto.customer.document,
@@ -181,7 +175,7 @@ export class CheckoutService {
   private async fetchItems(products: Product[]) {
     return products.map((product) => {
       return {
-        amount: product.amount.toString(),
+        amount: product.amount * 100,
         description: product.description,
         id: product.id,
         code: product.id,
@@ -196,7 +190,7 @@ export class CheckoutService {
   ) {
     return products.map((product) => {
       return {
-        amount: product.amount,
+        amount: product.amount * 100,
         payment_method: payment_method,
         pix: {
           expires_in: 1000 * 60 * 15,

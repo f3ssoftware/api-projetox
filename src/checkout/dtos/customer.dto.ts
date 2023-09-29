@@ -4,6 +4,8 @@ import { IsDate, IsEnum, IsObject, IsString } from 'class-validator';
 import { PhoneNumberDto } from './phone-number.dto';
 import { PagarmeDocumentTypes } from '../enums/pagarme-document-types.enum';
 import { PagarmeCustomerTypes } from '../enums/pagarme-customer-types.enum';
+import { PagarmeGenders } from '../enums/pagarme-genders.enum';
+import { Transform } from 'class-transformer';
 
 export class CustomerDto {
   @ApiProperty()
@@ -36,9 +38,10 @@ export class CustomerDto {
 
   @ApiProperty()
   @IsDate()
+  @Transform(({ value }) => new Date(value))
   birthDate: Date;
 
   @ApiProperty()
-  @IsString()
-  gender: string;
+  @IsEnum(PagarmeGenders)
+  gender: PagarmeGenders;
 }
