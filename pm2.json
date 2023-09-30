@@ -14,7 +14,8 @@
     "PAGARME_PUBLIC_KEY": "pk_test_r8l9G1mH55iaEpv6",
     "PAGARME_SECRET_KEY": "sk_test_9BLvMWVHeUn5E4Dk",
     "AWS_COGNITO_USER_POOL_ID": "us-west-1_LUkW6AImW",
-    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu"
+    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu",
+    "PAGARME_API_URL": "https://api.pagar.me"
   },
   "env_prod": {
     "NODE_ENV": "prod",
@@ -27,6 +28,7 @@
     "PAGARME_PUBLIC_KEY": "pk_test_r8l9G1mH55iaEpv6",
     "PAGARME_SECRET_KEY": "sk_test_9BLvMWVHeUn5E4Dk",
     "AWS_COGNITO_USER_POOL_ID": "us-west-1_LUkW6AImW",
-    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu"
+    "AWS_COGNITO_CLIENT_ID": "71k5st4jo9ffr117a3hkduvcu",
+    "PAGARME_API_URL": "https://api.pagar.me"
   }
 }
