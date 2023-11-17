@@ -1,5 +1,5 @@
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   AuthenticationDetails,
   CognitoUser,
@@ -10,7 +10,7 @@ import {
 } from 'amazon-cognito-identity-js';
 import { CognitoRegister } from '../dtos/cognito-register.dto';
 import { CognitoLoginDto } from '../dtos/cognito-login.dto';
-
+import AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 @Injectable()
 export class CognitoService {
   private readonly userPool: CognitoUserPool;
@@ -69,6 +69,23 @@ export class CognitoService {
           }
         },
       );
+    });
+  }
+
+  confirmSignUp(email: string, token: string) {
+    const userData = {
+      Username: email,
+      Pool: this.userPool,
+    };
+
+    const cognitoUser = new CognitoUser(userData);
+    cognitoUser.confirmRegistration(token, true, function (err, result) {
+      if (err) {
+        alert(err.message || JSON.stringify(err));
+        throw new InternalServerErrorException(err);
+      }
+
+      return result;
     });
   }
 

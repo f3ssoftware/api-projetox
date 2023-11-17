@@ -52,11 +52,12 @@ export class AuthGuard implements CanActivate {
         'Acesso negado! O token informado está expirado.',
       );
     }
-
-    const userRoles: string[] = decoded?.resource_access?.pjx?.roles;
+    console.log(decoded);
+    const userRoles: string[] = decoded['cognito:groups'];
 
     let canActivate = false;
 
+    console.log(userRoles);
     requiredRoles.forEach((r) => {
       if (userRoles?.includes(r)) {
         canActivate = true;

@@ -18,6 +18,7 @@ import { KeycloakService } from '../services/keycloak.service';
 import { CognitoService } from '../services/cognito.service';
 import { CognitoLoginDto } from '../dtos/cognito-login.dto';
 import { CognitoConfirmPasswordDto } from '../dtos/cognito-confirm-password.dto';
+import { CognitoConfirmUserDto } from '../dtos/cognito-confirm-user.dto';
 
 @ApiTags('Authentication')
 @Controller({ version: ['1'], path: 'authentication' })
@@ -48,6 +49,15 @@ export class AuthenticationController {
       confirmPasswordDto.email,
       confirmPasswordDto.code,
       confirmPasswordDto.newPassword,
+    );
+  }
+
+  @Post('confirm-user')
+  @Version('1')
+  public async confirmUser(@Body() confirmUserDto: CognitoConfirmUserDto) {
+    return this.cognitoService.verifyUser(
+      confirmUserDto.email,
+      confirmUserDto.token,
     );
   }
 
