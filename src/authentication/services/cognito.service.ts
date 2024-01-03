@@ -11,6 +11,8 @@ import {
 import { CognitoRegister } from '../dtos/cognito-register.dto';
 import { CognitoLoginDto } from '../dtos/cognito-login.dto';
 import AmazonCognitoIdentity from 'amazon-cognito-identity-js';
+import * as dateFns from 'date-fns';
+
 @Injectable()
 export class CognitoService {
   private readonly userPool: CognitoUserPool;
@@ -57,7 +59,10 @@ export class CognitoService {
           }),
           new CognitoUserAttribute({
             Name: 'birthdate',
-            Value: cognitoRegistration.birthdate,
+            Value: dateFns.format(
+              new Date(cognitoRegistration.birthdate),
+              'yyyy-MM-dd',
+            ),
           }),
         ],
         null,
@@ -69,23 +74,6 @@ export class CognitoService {
           }
         },
       );
-    });
-  }
-
-  confirmSignUp(email: string, token: string) {
-    const userData = {
-      Username: email,
-      Pool: this.userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
-    cognitoUser.confirmRegistration(token, true, function (err, result) {
-      if (err) {
-        alert(err.message || JSON.stringify(err));
-        throw new InternalServerErrorException(err);
-      }
-
-      return result;
     });
   }
 
