@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsDateString, IsEmail, IsString } from 'class-validator';
+import { CognitoAddress } from './cognito-address.dto';
 
 export class CognitoRegister {
   @ApiProperty()
@@ -27,12 +28,5 @@ export class CognitoRegister {
   birthdate: string;
 
   @ApiPropertyOptional()
-  address: {
-    state: string;
-    city: string;
-    district: string;
-    zipcode: string;
-    number: string;
-    complement: string;
-  };
+  address: CognitoAddress;
 }

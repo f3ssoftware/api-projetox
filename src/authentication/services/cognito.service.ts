@@ -1,5 +1,14 @@
-import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  CognitoIdentityProviderClient,
+  NotAuthorizedException,
+  UserNotConfirmedException,
+} from '@aws-sdk/client-cognito-identity-provider';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   AuthenticationDetails,
   CognitoUser,
@@ -92,7 +101,7 @@ export class CognitoService {
     });
   }
 
-  authenticateUser(loginRequest: CognitoLoginDto) {
+  async authenticateUser(loginRequest: CognitoLoginDto) {
     const { email, password } = loginRequest;
 
     const authenticationDetails = new AuthenticationDetails({
@@ -107,16 +116,32 @@ export class CognitoService {
 
     const newUser = new CognitoUser(userData);
 
-    return new Promise<CognitoUserSession>((resolve, reject) => {
-      return newUser.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => {
-          resolve(result);
-        },
-        onFailure: (err) => {
-          reject(err);
-        },
+    try {
+      return await new Promise<CognitoUserSession>((resolve, reject) => {
+        return newUser.authenticateUser(authenticationDetails, {
+          onSuccess: (result) => {
+            resolve(result);
+          },
+          onFailure: (err) => {
+            reject(err);
+          },
+        });
       });
-    });
+    } catch (err) {
+      console.log('code', err.code);
+      switch (err.code) {
+        case 'UserNotConfirmedException': {
+          throw new ConflictException(err.message);
+        }
+        case 'NotAuthorizedException': {
+          console.log('caindo no not authorized');
+          throw new UnauthorizedException(err.message);
+        }
+        default: {
+          throw new ConflictException('Erro');
+        }
+      }
+    }
   }
 
   confirmPassword(email, verificationCode, newPassword) {
