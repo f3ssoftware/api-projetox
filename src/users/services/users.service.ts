@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UserRegistrationDTO } from '../models/user-registration.dto';
 import { KeycloakAdminService } from '../../authentication/services/keycloak-admin.service';
 import { KeycloakUserRepresentationDTO } from '../../authentication/dtos/keycloak-user-representation';
@@ -37,7 +41,11 @@ export class UsersService {
   }
 
   async registerCognito(cognitoRegister: CognitoRegister) {
-    return this.cognitoService.registerUser(cognitoRegister);
+    try {
+      return await this.cognitoService.registerUser(cognitoRegister);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 
   async verifyUserCognito(cognitoUserVerification: CognitoUserVerificationDto) {

@@ -128,7 +128,6 @@ export class CognitoService {
         });
       });
     } catch (err) {
-      console.log('code', err.code);
       switch (err.code) {
         case 'UserNotConfirmedException': {
           throw new ConflictException(err.message);
