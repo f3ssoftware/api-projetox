@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsDateString, IsEmail, IsString } from 'class-validator';
+import { IsDate, IsDateString, IsEmail, IsString, Matches } from 'class-validator';
 import { CognitoAddress } from './cognito-address.dto';
 
 export class CognitoRegister {
@@ -8,6 +8,9 @@ export class CognitoRegister {
   email: string;
 
   @ApiProperty()
+  @Matches(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[A-Z])(?=.*[a-z]).{8,}$/, {
+    message: 'Senha precisa ter pelo menos 1 número, 1 caracter especial, 1 letra maiuscula e 1 letra minúscula.'
+  })
   @IsString()
   password: string;
 

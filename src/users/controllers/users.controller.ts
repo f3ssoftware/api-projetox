@@ -35,6 +35,8 @@ export class UsersController {
   public verifyUser(
     @Body() cognitoUserVerificationDto: CognitoUserVerificationDto,
   ) {
+    
     return this.usersService.verifyUserCognito(cognitoUserVerificationDto);
+    
   }
 }
