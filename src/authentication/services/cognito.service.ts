@@ -1,6 +1,8 @@
 import {
+  AdminAddUserToGroupCommand,
   CognitoIdentityProviderClient,
   NotAuthorizedException,
+  SignUpCommand,
   UserNotConfirmedException,
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
@@ -39,51 +41,87 @@ export class CognitoService {
     });
   }
 
-  registerUser(cognitoRegistration: CognitoRegister): Promise<ISignUpResult> {
-    return new Promise((resolve, reject) => {
-      return this.userPool.signUp(
-        cognitoRegistration.email,
-        cognitoRegistration.password,
-        // {
-        //   gender: cognitoRegistration.gender,
-        //   given_name: cognitoRegistration.given_name,
-        //   family_name: cognitoRegistration.family_name,
-        // }[
-        [
-          new CognitoUserAttribute({
-            Name: 'email',
-            Value: cognitoRegistration.email,
-          }),
-          new CognitoUserAttribute({
-            Name: 'gender',
-            Value: cognitoRegistration.gender,
-          }),
-          new CognitoUserAttribute({
-            Name: 'given_name',
-            Value: cognitoRegistration.given_name,
-          }),
-          new CognitoUserAttribute({
-            Name: 'family_name',
-            Value: cognitoRegistration.family_name,
-          }),
-          new CognitoUserAttribute({
-            Name: 'birthdate',
-            Value: dateFns.format(
-              new Date(cognitoRegistration.birthdate),
-              'yyyy-MM-dd',
-            ),
-          }),
-        ],
-        null,
-        (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        },
-      );
+  async registerUser(cognitoRegistration: CognitoRegister) {
+    let command: any = new SignUpCommand({
+      ClientId: process.env.AWS_COGNITO_CLIENT_ID,
+      Username: cognitoRegistration.email,
+      Password: cognitoRegistration.password,
+      UserAttributes: [
+        new CognitoUserAttribute({
+          Name: 'email',
+          Value: cognitoRegistration.email,
+        }),
+        new CognitoUserAttribute({
+          Name: 'gender',
+          Value: cognitoRegistration.gender,
+        }),
+        new CognitoUserAttribute({
+          Name: 'given_name',
+          Value: cognitoRegistration.given_name,
+        }),
+        new CognitoUserAttribute({
+          Name: 'family_name',
+          Value: cognitoRegistration.family_name,
+        }),
+        new CognitoUserAttribute({
+          Name: 'birthdate',
+          Value: dateFns.format(
+            new Date(cognitoRegistration.birthdate),
+            'yyyy-MM-dd',
+          ),
+        }),
+      ],
     });
+
+    await this.providerClient.send(command);
+
+    command = new AdminAddUserToGroupCommand({
+      UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID,
+      Username: cognitoRegistration.email,
+      GroupName: 'premium',
+    });
+
+    await this.providerClient.send(command);
+
+    // return new Promise((resolve, reject) => {
+    //   return this.userPool.signUp(
+    //     cognitoRegistration.email,
+    //     cognitoRegistration.password,
+    //     [
+    //       new CognitoUserAttribute({
+    //         Name: 'email',
+    //         Value: cognitoRegistration.email,
+    //       }),
+    //       new CognitoUserAttribute({
+    //         Name: 'gender',
+    //         Value: cognitoRegistration.gender,
+    //       }),
+    //       new CognitoUserAttribute({
+    //         Name: 'given_name',
+    //         Value: cognitoRegistration.given_name,
+    //       }),
+    //       new CognitoUserAttribute({
+    //         Name: 'family_name',
+    //         Value: cognitoRegistration.family_name,
+    //       }),
+    //       new CognitoUserAttribute({
+    //         Name: 'birthdate',
+    //         Value: dateFns.format(
+    //           new Date(cognitoRegistration.birthdate),
+    //           'yyyy-MM-dd',
+    //         ),
+    //       }),
+    //     ],
+    //     null,
+    //     (err, result) => {
+    //       if (err) {
+    //         reject(err);
+    //       } else {
+    //         resolve(result);
+    //       }
+    //     },
+    //   );
+    // });
   }
 
   verifyUser(email, verificationCode) {
